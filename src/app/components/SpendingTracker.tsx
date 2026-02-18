@@ -9,7 +9,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { DollarSign, Plus, Trash2, Camera, TrendingUp, Calendar } from 'lucide-react';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { toast } from 'sonner';
-import { SpendingEntry } from '../context/AppContext';
 
 const SPENDING_CATEGORIES = [
   { value: 'home', label: '🏠 Home', color: 'from-orange-400 to-red-400' },
@@ -28,13 +27,14 @@ export function SpendingTracker() {
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
-  const [receiptImage, setReceiptImage] = useState('');
   const [imagePreview, setImagePreview] = useState('');
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const today = format(new Date(), 'yyyy-MM-dd');
   const todaySpending = getSpendingForDate(today);
   const todayTotal = todaySpending.reduce((sum, entry) => sum + entry.amount, 0);
-  
+
   const monthStart = format(startOfMonth(new Date()), 'yyyy-MM-dd');
   const monthEnd = format(endOfMonth(new Date()), 'yyyy-MM-dd');
   const monthTotal = getTotalSpending(monthStart, monthEnd);
@@ -42,55 +42,64 @@ export function SpendingTracker() {
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const result = reader.result as string;
-        setReceiptImage(result);
-        setImagePreview(result);
-      };
-      reader.readAsDataURL(file);
+    if (!file) {
+      return;
     }
+
+    setReceiptFile(file);
+    setImagePreview(URL.createObjectURL(file));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!amount || !category || !description) {
       toast.error('Please fill in all fields');
       return;
     }
 
     const numAmount = parseFloat(amount);
-    if (isNaN(numAmount) || numAmount <= 0) {
+    if (Number.isNaN(numAmount) || numAmount <= 0) {
       toast.error('Please enter a valid amount');
       return;
     }
 
-    addSpending({
-      date: today,
-      amount: numAmount,
-      category,
-      description,
-      receiptImage: receiptImage || undefined,
-    });
+    setIsSubmitting(true);
 
-    toast.success('Spending added! 💸');
-    setAmount('');
-    setCategory('');
-    setDescription('');
-    setReceiptImage('');
-    setImagePreview('');
-    setIsOpen(false);
+    try {
+      await addSpending({
+        date: today,
+        amount: numAmount,
+        category,
+        description,
+        imageFile: receiptFile,
+      });
+
+      toast.success('Spending added! 💸');
+      setAmount('');
+      setCategory('');
+      setDescription('');
+      setImagePreview('');
+      setReceiptFile(null);
+      setIsOpen(false);
+    } catch {
+      toast.error('Could not save spending. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleDelete = (id: string) => {
-    deleteSpending(id);
-    toast.success('Spending entry deleted! 🗑️');
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteSpending(id);
+      toast.success('Spending entry deleted! 🗑️');
+    } catch {
+      toast.error('Could not delete spending entry.');
+    }
   };
 
   const getCategoryInfo = (categoryValue: string) => {
-    return SPENDING_CATEGORIES.find(cat => cat.value === categoryValue) || SPENDING_CATEGORIES[SPENDING_CATEGORIES.length - 1];
+    return SPENDING_CATEGORIES.find((cat) => cat.value === categoryValue) || SPENDING_CATEGORIES[SPENDING_CATEGORIES.length - 1];
   };
 
   return (
@@ -174,16 +183,15 @@ export function SpendingTracker() {
                     </div>
                   )}
                 </div>
-                <Button type="submit" className="w-full bg-gradient-to-r from-green-400 to-emerald-400 hover:from-green-500 hover:to-emerald-500 text-white">
+                <Button type="submit" disabled={isSubmitting} className="w-full bg-gradient-to-r from-green-400 to-emerald-400 hover:from-green-500 hover:to-emerald-500 text-white">
                   <Plus className="w-4 h-4 mr-1" />
-                  Add Spending
+                  {isSubmitting ? 'Saving...' : 'Add Spending'}
                 </Button>
               </form>
             </DialogContent>
           </Dialog>
         </div>
 
-        {/* Spending Stats */}
         <div className="grid grid-cols-3 gap-3 mb-4">
           <div className="bg-white rounded-lg border-2 border-green-200 p-3 text-center">
             <Calendar className="w-4 h-4 text-green-500 mx-auto mb-1" />
@@ -202,7 +210,6 @@ export function SpendingTracker() {
           </div>
         </div>
 
-        {/* Today's Spending List */}
         <div className="space-y-2 max-h-64 overflow-y-auto">
           <h4 className="text-sm font-bold text-green-700 mb-2">Today's Expenses</h4>
           {todaySpending.length === 0 ? (
@@ -234,7 +241,7 @@ export function SpendingTracker() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => handleDelete(entry.id)}
+                    onClick={() => void handleDelete(entry.id)}
                     className="opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:text-red-700 hover:bg-red-50"
                   >
                     <Trash2 className="w-4 h-4" />

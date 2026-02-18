@@ -11,24 +11,29 @@ export function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { login } = useApp();
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
+
     if (!email || !password) {
       setError('Please enter both email and password');
       return;
     }
 
-    const success = login(email, password);
+    setIsSubmitting(true);
+    const success = await login(email.trim(), password);
+    setIsSubmitting(false);
+
     if (success) {
       navigate('/dashboard');
-    } else {
-      setError('Invalid credentials');
+      return;
     }
+
+    setError('Unable to sign in. Check your credentials and try again.');
   };
 
   return (
@@ -43,17 +48,18 @@ export function Login() {
           <div>
             <CardTitle className="text-3xl text-pink-600">✨ Workout Tracker ✨</CardTitle>
             <CardDescription className="mt-2 text-purple-600 text-base">
-              Track your fitness journey!
+              Sign in with Firebase Auth (first login creates your account)
             </CardDescription>
           </div>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-pink-700">Email / Username</Label>
+              <Label htmlFor="email" className="text-pink-700">Email</Label>
               <Input
                 id="email"
-                type="text"
+                type="email"
+                autoComplete="email"
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -65,6 +71,7 @@ export function Login() {
               <Input
                 id="password"
                 type="password"
+                autoComplete="current-password"
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -76,8 +83,12 @@ export function Login() {
                 {error}
               </div>
             )}
-            <Button type="submit" className="w-full bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 text-white text-lg h-12">
-              ♡ Login ♡
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 text-white text-lg h-12"
+            >
+              {isSubmitting ? 'Signing in...' : '♡ Login ♡'}
             </Button>
           </form>
         </CardContent>

@@ -29,47 +29,52 @@ export function AddWorkoutModal({ isOpen, onClose, selectedDate, editWorkout }: 
     notes: '',
   });
   const [exercises, setExercises] = useState<Exercise[]>([
-    { name: '', sets: undefined, reps: undefined, weight: undefined }
+    { name: '', sets: undefined, reps: undefined, weight: undefined },
   ]);
-  const [imagePreview, setImagePreview] = useState<string>('');
+  const [imagePreview, setImagePreview] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Reset form when modal opens or editWorkout changes
   useEffect(() => {
-    if (isOpen) {
-      if (editWorkout) {
-        setFormData({
-          date: editWorkout.date,
-          bodyWeight: editWorkout.bodyWeight?.toString() || '',
-          notes: editWorkout.notes || '',
-        });
-        setExercises(
-          editWorkout.exercises && editWorkout.exercises.length > 0
-            ? editWorkout.exercises
-            : [{ name: '', sets: undefined, reps: undefined, weight: undefined }]
-        );
-        setImagePreview(editWorkout.imageUrl || '');
-      } else {
-        setFormData({
-          date: selectedDate || '',
-          bodyWeight: '',
-          notes: '',
-        });
-        setExercises([{ name: '', sets: undefined, reps: undefined, weight: undefined }]);
-        setImagePreview('');
-      }
+    if (!isOpen) {
+      return;
     }
+
+    if (editWorkout) {
+      setFormData({
+        date: editWorkout.date,
+        bodyWeight: editWorkout.bodyWeight?.toString() || '',
+        notes: editWorkout.notes || '',
+      });
+      setExercises(
+        editWorkout.exercises && editWorkout.exercises.length > 0
+          ? editWorkout.exercises
+          : [{ name: '', sets: undefined, reps: undefined, weight: undefined }],
+      );
+      setImagePreview(editWorkout.imageUrl || '');
+      setImageFile(null);
+      return;
+    }
+
+    setFormData({
+      date: selectedDate || '',
+      bodyWeight: '',
+      notes: '',
+    });
+    setExercises([{ name: '', sets: undefined, reps: undefined, weight: undefined }]);
+    setImagePreview('');
+    setImageFile(null);
   }, [isOpen, editWorkout, selectedDate]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.date) {
       toast.error('Please select a date');
       return;
     }
 
-    const validExercises = exercises.filter(ex => ex.name.trim() !== '');
-    
+    const validExercises = exercises.filter((exercise) => exercise.name.trim() !== '');
     if (validExercises.length === 0) {
       toast.error('Please add at least one exercise');
       return;
@@ -80,18 +85,27 @@ export function AddWorkoutModal({ isOpen, onClose, selectedDate, editWorkout }: 
       exercises: validExercises,
       bodyWeight: formData.bodyWeight ? parseFloat(formData.bodyWeight) : undefined,
       notes: formData.notes,
-      imageUrl: imagePreview,
+      imageUrl: !imageFile ? imagePreview || undefined : undefined,
+      imageFile,
     };
 
-    if (editWorkout) {
-      updateWorkout(editWorkout.id, workoutData);
-      toast.success('Workout updated! 💪');
-    } else {
-      addWorkout(workoutData);
-      toast.success('Workout logged! 💪');
-    }
+    setIsSubmitting(true);
 
-    handleClose();
+    try {
+      if (editWorkout) {
+        await updateWorkout(editWorkout.id, workoutData);
+        toast.success('Workout updated! 💪');
+      } else {
+        await addWorkout(workoutData);
+        toast.success('Workout logged! 💪');
+      }
+
+      handleClose();
+    } catch {
+      toast.error('Could not save workout. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleClose = () => {
@@ -102,18 +116,20 @@ export function AddWorkoutModal({ isOpen, onClose, selectedDate, editWorkout }: 
     });
     setExercises([{ name: '', sets: undefined, reps: undefined, weight: undefined }]);
     setImagePreview('');
+    setImageFile(null);
+    setIsSubmitting(false);
     onClose();
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+    if (!file) {
+      return;
     }
+
+    setImageFile(file);
+    const previewUrl = URL.createObjectURL(file);
+    setImagePreview(previewUrl);
   };
 
   const addExercise = () => {
@@ -185,7 +201,7 @@ export function AddWorkoutModal({ isOpen, onClose, selectedDate, editWorkout }: 
                 Add Exercise
               </Button>
             </div>
-            
+
             <div className="space-y-3">
               {exercises.map((exercise, index) => (
                 <div key={index} className="p-4 bg-white rounded-lg border-2 border-pink-200 space-y-3">
@@ -263,7 +279,10 @@ export function AddWorkoutModal({ isOpen, onClose, selectedDate, editWorkout }: 
                   variant="destructive"
                   size="sm"
                   className="absolute top-2 right-2"
-                  onClick={() => setImagePreview('')}
+                  onClick={() => {
+                    setImagePreview('');
+                    setImageFile(null);
+                  }}
                 >
                   <X className="w-4 h-4" />
                 </Button>
@@ -289,9 +308,10 @@ export function AddWorkoutModal({ isOpen, onClose, selectedDate, editWorkout }: 
           <div className="flex gap-3 pt-4">
             <Button
               type="submit"
+              disabled={isSubmitting}
               className="flex-1 bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 text-white text-lg h-12"
             >
-              ♡ Save Workout ♡
+              {isSubmitting ? 'Saving...' : '♡ Save Workout ♡'}
             </Button>
             <Button
               type="button"

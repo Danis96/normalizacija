@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router';
 import { useApp } from '../context/AppContext';
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback } from './ui/avatar';
-import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from './ui/sheet';
+import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from './ui/sheet';
 import {
   BookOpen,
   Languages,
@@ -36,14 +36,13 @@ export function Layout({ children }: LayoutProps) {
     { label: 'Workout History', path: '/events', icon: ListChecks },
   ];
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/');
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-pink-200">
-      {/* Top Navigation */}
       <header className="bg-white/80 backdrop-blur-sm border-b-4 border-pink-300 sticky top-0 z-10">
         <div className="px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -60,6 +59,9 @@ export function Layout({ children }: LayoutProps) {
               <SheetContent side="left" className="border-r-4 border-pink-300 bg-white">
                 <SheetHeader>
                   <SheetTitle className="text-pink-700">Menu</SheetTitle>
+                  <SheetDescription className="sr-only">
+                    Main navigation links
+                  </SheetDescription>
                 </SheetHeader>
                 <nav className="px-4 space-y-2">
                   {navigationItems.map((item) => {

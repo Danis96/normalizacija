@@ -1,0 +1,83 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+
+      match /workouts/{workoutId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId)
+          && request.resource.data.keys().hasOnly(['date', 'exercises', 'bodyWeight', 'notes', 'imageUrl'])
+          && request.resource.data.date is string
+          && request.resource.data.exercises is list
+          && request.resource.data.notes is string;
+        allow update: if isOwner(userId);
+        allow delete: if isOwner(userId);
+      }
+
+      match /waterLogs/{waterId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId)
+          && request.resource.data.keys().hasOnly(['date', 'bottles'])
+          && request.resource.data.date is string
+          && request.resource.data.bottles is int
+          && request.resource.data.bottles >= 0;
+        allow delete: if isOwner(userId);
+      }
+
+      match /todos/{todoId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId)
+          && request.resource.data.keys().hasOnly(['text', 'completed', 'date'])
+          && request.resource.data.text is string
+          && request.resource.data.completed is bool;
+        allow update: if isOwner(userId)
+          && request.resource.data.keys().hasOnly(['text', 'completed', 'date'])
+          && request.resource.data.text is string
+          && request.resource.data.completed is bool;
+        allow delete: if isOwner(userId);
+      }
+
+      match /spending/{spendingId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId)
+          && request.resource.data.keys().hasOnly(['date', 'amount', 'category', 'description', 'receiptImage'])
+          && request.resource.data.date is string
+          && request.resource.data.amount is number
+          && request.resource.data.category is string
+          && request.resource.data.description is string;
+        allow delete: if isOwner(userId);
+      }
+
+      match /libraryItems/{libraryId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId)
+          && request.resource.data.keys().hasOnly(['title', 'review', 'rating', 'image', 'createdAt'])
+          && request.resource.data.title is string
+          && request.resource.data.review is string
+          && request.resource.data.rating is int
+          && request.resource.data.createdAt is string;
+        allow delete: if isOwner(userId);
+      }
+
+      match /cinemaItems/{cinemaId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId)
+          && request.resource.data.keys().hasOnly(['title', 'review', 'rating', 'image', 'createdAt'])
+          && request.resource.data.title is string
+          && request.resource.data.review is string
+          && request.resource.data.rating is int
+          && request.resource.data.createdAt is string;
+        allow delete: if isOwner(userId);
+      }
+    }
+  }
+}

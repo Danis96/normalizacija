@@ -76,6 +76,9 @@ src/
 # Install dependencies
 npm install
 
+# Copy env template and adjust values if needed
+cp .env.example .env.local
+
 # Run development server (default: http://localhost:5173)
 npm run dev
 
@@ -83,7 +86,27 @@ npm run dev
 npm run build
 ```
 
-After `npm run dev`, open the app, sign in (any email/password works in this demo), and use the sidebar to jump between Dashboard, Daily Tasks, Spending, Library, Cinema, Language Learning, and Workout History.
+After `npm run dev`, open the app, sign in with email/password (first sign-in creates the account), and use the sidebar to jump between Dashboard, Daily Tasks, Spending, Library, Cinema, Language Learning, and Workout History.
+
+## Firebase backend
+
+The app now uses Firebase as production backend:
+
+- Firebase Auth (email/password)
+- Cloud Firestore (all feature data per user under `users/{uid}/...`)
+- Firebase Storage (image uploads for workouts, receipts, books, and movies)
+
+Included backend config files:
+
+- `firestore.rules`
+- `firestore.indexes.json`
+- `storage.rules`
+
+Deploy them with Firebase CLI after `firebase init`:
+
+```bash
+firebase deploy --only firestore:rules,firestore:indexes,storage
+```
 
 ---
 

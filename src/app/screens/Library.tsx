@@ -16,47 +16,57 @@ export function Library() {
   const [title, setTitle] = useState('');
   const [review, setReview] = useState('');
   const [rating, setRating] = useState(0);
-  const [image, setImage] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      return;
+    }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const result = reader.result as string;
-      setImage(result);
-      setImagePreview(result);
-    };
-    reader.readAsDataURL(file);
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
   };
 
-  const handleAddBook = (e: React.FormEvent) => {
+  const handleAddBook = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !review.trim() || rating < 1) {
       toast.error('Add title, review and rating');
       return;
     }
 
-    addLibraryItem({
-      title: title.trim(),
-      review: review.trim(),
-      rating,
-      image: image || undefined,
-    });
+    setIsSubmitting(true);
 
-    setTitle('');
-    setReview('');
-    setRating(0);
-    setImage('');
-    setImagePreview('');
-    toast.success('Book added to Library');
+    try {
+      await addLibraryItem({
+        title: title.trim(),
+        review: review.trim(),
+        rating,
+        imageFile,
+      });
+
+      setTitle('');
+      setReview('');
+      setRating(0);
+      setImageFile(null);
+      setImagePreview('');
+      toast.success('Book added to Library');
+    } catch {
+      toast.error('Could not add book.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleDelete = (id: string) => {
-    deleteLibraryItem(id);
-    toast.success('Book removed');
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteLibraryItem(id);
+      toast.success('Book removed');
+    } catch {
+      toast.error('Could not remove book.');
+    }
   };
 
   return (
@@ -126,9 +136,9 @@ export function Library() {
                   />
                 )}
               </div>
-              <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700 text-white">
+              <Button type="submit" disabled={isSubmitting} className="bg-indigo-600 hover:bg-indigo-700 text-white">
                 <Plus className="w-4 h-4 mr-1" />
-                Add Book
+                {isSubmitting ? 'Saving...' : 'Add Book'}
               </Button>
             </form>
           </CardContent>
@@ -164,7 +174,7 @@ export function Library() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleDelete(item.id)}
+                        onClick={() => void handleDelete(item.id)}
                         className="text-red-500 hover:text-red-700 hover:bg-red-50"
                       >
                         <Trash2 className="w-4 h-4" />

@@ -12,25 +12,39 @@ export function WheneverTodoList() {
   const [newTodoText, setNewTodoText] = useState('');
   const todos = getWheneverTodos();
 
-  const handleAddTodo = (e: React.FormEvent) => {
+  const handleAddTodo = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newTodoText.trim()) {
-      addTodo(newTodoText); // No date = "whenever" task
+    if (!newTodoText.trim()) {
+      return;
+    }
+
+    try {
+      await addTodo(newTodoText);
       setNewTodoText('');
       toast.success('Task added to "Whenever" list! ✨');
+    } catch {
+      toast.error('Could not add task.');
     }
   };
 
-  const handleToggle = (id: string) => {
-    toggleTodo(id);
+  const handleToggle = async (id: string) => {
+    try {
+      await toggleTodo(id);
+    } catch {
+      toast.error('Could not update task.');
+    }
   };
 
-  const handleDelete = (id: string) => {
-    deleteTodo(id);
-    toast.success('Task removed! 🗑️');
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteTodo(id);
+      toast.success('Task removed! 🗑️');
+    } catch {
+      toast.error('Could not remove task.');
+    }
   };
 
-  const completedCount = todos.filter(t => t.completed).length;
+  const completedCount = todos.filter((todo) => todo.completed).length;
   const totalCount = todos.length;
 
   return (
@@ -56,7 +70,6 @@ export function WheneverTodoList() {
           )}
         </div>
 
-        {/* Add Todo Form */}
         <form onSubmit={handleAddTodo} className="mb-4">
           <div className="flex gap-2">
             <Input
@@ -76,7 +89,6 @@ export function WheneverTodoList() {
           </div>
         </form>
 
-        {/* Todo List */}
         <div className="space-y-2 max-h-96 overflow-y-auto">
           {todos.length === 0 ? (
             <div className="text-center py-8 text-pink-400">
@@ -92,7 +104,7 @@ export function WheneverTodoList() {
                 <Checkbox
                   id={`todo-${todo.id}`}
                   checked={todo.completed}
-                  onCheckedChange={() => handleToggle(todo.id)}
+                  onCheckedChange={() => void handleToggle(todo.id)}
                   className="border-2 border-purple-300 data-[state=checked]:bg-purple-500"
                 />
                 <label
@@ -106,7 +118,7 @@ export function WheneverTodoList() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => handleDelete(todo.id)}
+                  onClick={() => void handleDelete(todo.id)}
                   className="opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:text-red-700 hover:bg-red-50"
                 >
                   <Trash2 className="w-4 h-4" />

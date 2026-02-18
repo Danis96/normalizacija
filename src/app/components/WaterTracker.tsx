@@ -10,19 +10,28 @@ export function WaterTracker() {
   const today = format(new Date(), 'yyyy-MM-dd');
   const bottlesCount = getWaterForDate(today);
 
-  const handleAddWater = () => {
-    addWaterBottle(today);
-    toast.success('Water bottle added! 💧');
-  };
-
-  const handleRemoveWater = () => {
-    if (bottlesCount > 0) {
-      removeWaterBottle(today);
-      toast.success('Water bottle removed! 🔄');
+  const handleAddWater = async () => {
+    try {
+      await addWaterBottle(today);
+      toast.success('Water bottle added! 💧');
+    } catch {
+      toast.error('Could not update water intake.');
     }
   };
 
-  // Calculate fill percentage (max 8 bottles for visual purposes)
+  const handleRemoveWater = async () => {
+    if (bottlesCount === 0) {
+      return;
+    }
+
+    try {
+      await removeWaterBottle(today);
+      toast.success('Water bottle removed! 🔄');
+    } catch {
+      toast.error('Could not update water intake.');
+    }
+  };
+
   const maxBottles = 8;
   const fillPercentage = Math.min((bottlesCount / maxBottles) * 100, 100);
 
@@ -30,29 +39,22 @@ export function WaterTracker() {
     <Card className="border-4 border-blue-300 bg-gradient-to-br from-blue-50 to-cyan-50 shadow-lg">
       <CardContent className="p-6">
         <div className="flex items-center gap-4">
-          {/* Water Bottle Visualization */}
           <div className="relative w-24 h-32 flex-shrink-0">
-            {/* Bottle Container */}
             <div className="absolute inset-0 bg-white/50 border-4 border-blue-400 rounded-lg overflow-hidden">
-              {/* Water Fill */}
               <div
                 className="absolute bottom-0 w-full bg-gradient-to-t from-blue-400 to-cyan-300 transition-all duration-500 ease-out"
                 style={{ height: `${fillPercentage}%` }}
               >
-                {/* Wave effect */}
                 <div className="absolute top-0 left-0 right-0 h-2 bg-blue-300/50 animate-pulse" />
               </div>
             </div>
-            {/* Bottle Cap */}
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-12 h-6 bg-blue-400 rounded-t-lg border-4 border-blue-500" />
-            
-            {/* Droplet Icon */}
+
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
               <Droplet className="w-8 h-8 text-blue-500 fill-blue-200" />
             </div>
           </div>
 
-          {/* Info and Button */}
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
               <Droplet className="w-5 h-5 text-blue-500 fill-blue-500" />
@@ -64,7 +66,7 @@ export function WaterTracker() {
             <p className="text-sm text-blue-600 mb-3">Stay hydrated! 💧</p>
             <div className="flex gap-2">
               <Button
-                onClick={handleAddWater}
+                onClick={() => void handleAddWater()}
                 size="sm"
                 className="bg-gradient-to-r from-blue-400 to-cyan-400 hover:from-blue-500 hover:to-cyan-500 text-white"
               >
@@ -72,7 +74,7 @@ export function WaterTracker() {
                 Add Bottle
               </Button>
               <Button
-                onClick={handleRemoveWater}
+                onClick={() => void handleRemoveWater()}
                 size="sm"
                 disabled={bottlesCount === 0}
                 className="bg-gradient-to-r from-red-400 to-orange-400 hover:from-red-500 hover:to-orange-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
@@ -84,7 +86,6 @@ export function WaterTracker() {
           </div>
         </div>
 
-        {/* Visual bottles count */}
         <div className="mt-4 flex gap-1 flex-wrap">
           {Array.from({ length: Math.min(bottlesCount, 12) }).map((_, idx) => (
             <div

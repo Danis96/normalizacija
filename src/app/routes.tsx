@@ -8,21 +8,48 @@ import { Spending } from './screens/Spending';
 import { Library } from './screens/Library';
 import { Cinema } from './screens/Cinema';
 import { LanguageLearning } from './screens/LanguageLearning';
+import { useApp } from './context/AppContext';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-  
+  const { isAuthenticated, isAuthLoading } = useApp();
+
+  if (isAuthLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-100 via-purple-100 to-pink-200">
+        <p className="text-lg text-purple-700 font-semibold">Loading your account...</p>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return <Navigate to="/" replace />;
   }
-  
+
   return <Layout>{children}</Layout>;
+}
+
+function PublicRoute() {
+  const { isAuthenticated, isAuthLoading } = useApp();
+
+  if (isAuthLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-100 via-purple-100 to-pink-200">
+        <p className="text-lg text-purple-700 font-semibold">Loading your account...</p>
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <Login />;
 }
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <Login />,
+    element: <PublicRoute />,
   },
   {
     path: '/dashboard',

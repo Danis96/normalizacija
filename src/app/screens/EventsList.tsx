@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
-import { Badge } from '../components/ui/badge';
 import { AddWorkoutModal } from '../components/AddWorkoutModal';
 import { WorkoutLog } from '../context/AppContext';
 import { Heart, Trash2, Scale, TrendingUp, Calendar, Edit } from 'lucide-react';
@@ -22,14 +21,20 @@ export function EventsList() {
     });
   }, [workouts]);
 
-  const handleDelete = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this workout?')) {
-      deleteWorkout(id);
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this workout?')) {
+      return;
+    }
+
+    try {
+      await deleteWorkout(id);
       toast.success('Workout deleted! ✨');
+    } catch {
+      toast.error('Could not delete workout.');
     }
   };
 
-  const totalExercises = workouts.reduce((acc, w) => acc + w.exercises.length, 0);
+  const totalExercises = workouts.reduce((acc, workout) => acc + workout.exercises.length, 0);
   const averageExercisesPerWorkout = workouts.length > 0 ? (totalExercises / workouts.length).toFixed(1) : 0;
 
   return (
@@ -44,7 +49,6 @@ export function EventsList() {
           </div>
         </div>
 
-        {/* Stats Summary */}
         <div className="grid grid-cols-2 gap-4">
           <Card className="border-4 border-pink-300 bg-white">
             <CardContent className="p-4">
@@ -95,7 +99,6 @@ export function EventsList() {
               >
                 <CardContent className="p-6">
                   <div className="flex gap-6">
-                    {/* Image or Placeholder */}
                     {workout.imageUrl ? (
                       <img
                         src={workout.imageUrl}
@@ -108,7 +111,6 @@ export function EventsList() {
                       </div>
                     )}
 
-                    {/* Workout Details */}
                     <div className="flex-1 space-y-3">
                       <div className="flex items-start justify-between">
                         <div>
@@ -129,7 +131,7 @@ export function EventsList() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleDelete(workout.id)}
+                            onClick={() => void handleDelete(workout.id)}
                             className="text-red-500 hover:text-red-700 hover:bg-red-50"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -148,7 +150,6 @@ export function EventsList() {
                         </div>
                       </div>
 
-                      {/* Exercises */}
                       <div className="space-y-2">
                         <h4 className="font-semibold text-pink-600">Exercises:</h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -174,7 +175,6 @@ export function EventsList() {
                         </div>
                       </div>
 
-                      {/* Notes */}
                       {workout.notes && (
                         <div className="border-l-4 border-pink-300 pl-3 py-1">
                           <p className="text-sm text-purple-600 italic">"{workout.notes}"</p>
