@@ -13,7 +13,6 @@ import {
 } from 'firebase/firestore';
 import {
   createUserWithEmailAndPassword,
-  fetchSignInMethodsForEmail,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut,
@@ -351,17 +350,44 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const methods = await fetchSignInMethodsForEmail(auth, email);
-
-      if (methods.length === 0) {
-        await createUserWithEmailAndPassword(auth, email, password);
-        return true;
-      }
-
       await signInWithEmailAndPassword(auth, email, password);
       return true;
-    } catch {
-      return false;
+    } catch (signInError) {
+      const signInCode =
+        typeof signInError === 'object' &&
+        signInError !== null &&
+        'code' in signInError
+          ? String((signInError as { code: string }).code)
+          : '';
+
+      // New account flow: if sign-in fails because user does not exist, try creating it.
+      if (signInCode !== 'auth/user-not-found' && signInCode !== 'auth/invalid-credential') {
+        return false;
+      }
+
+      try {
+        await createUserWithEmailAndPassword(auth, email, password);
+        return true;
+      } catch (createError) {
+        const createCode =
+          typeof createError === 'object' &&
+          createError !== null &&
+          'code' in createError
+            ? String((createError as { code: string }).code)
+            : '';
+
+        // Handle race condition: if user already exists, retry sign-in once.
+        if (createCode === 'auth/email-already-in-use') {
+          try {
+            await signInWithEmailAndPassword(auth, email, password);
+            return true;
+          } catch {
+            return false;
+          }
+        }
+
+        return false;
+      }
     }
   };
 

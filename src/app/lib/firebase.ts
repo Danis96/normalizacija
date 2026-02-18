@@ -5,7 +5,7 @@ import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 const fallbackConfig = {
-  apiKey: 'AIzaSyCA57fa_8G_7WfIuW1mDF_Dm8gxOD4soSo',
+  apiKey: 'AIzaSyAVpoZjLMygOgF6VU9rzt7e7XK2zhxCvtI',
   authDomain: 'normalizacija-1f71b.firebaseapp.com',
   projectId: 'normalizacija-1f71b',
   storageBucket: 'normalizacija-1f71b.appspot.com',
