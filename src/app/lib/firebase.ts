@@ -4,12 +4,22 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
-function env(name: string): string {
+const fallbackConfig = {
+  apiKey: 'AIzaSyCA57fa_8G_7WfIuW1mDF_Dm8gxOD4soSo',
+  authDomain: 'normalizacija-1f71b.firebaseapp.com',
+  projectId: 'normalizacija-1f71b',
+  storageBucket: 'normalizacija-1f71b.appspot.com',
+  messagingSenderId: '750075683245',
+  appId: '1:750075683245:web:74f7ba1bafc7980da24124',
+  measurementId: 'G-63H4QSFLTT',
+} as const;
+
+function env(name: string, fallback?: string): string | undefined {
   const value = import.meta.env[name];
-  if (!value) {
-    throw new Error(`Missing required Firebase env var: ${name}`);
+  if (value) {
+    return value as string;
   }
-  return value as string;
+  return fallback;
 }
 
 function normalizeStorageBucket(bucket?: string): string | undefined {
@@ -26,15 +36,18 @@ function normalizeStorageBucket(bucket?: string): string | undefined {
 }
 
 const firebaseConfig = {
-  apiKey: env('VITE_FIREBASE_API_KEY'),
-  authDomain: env('VITE_FIREBASE_AUTH_DOMAIN'),
-  projectId: env('VITE_FIREBASE_PROJECT_ID'),
+  apiKey: env('VITE_FIREBASE_API_KEY', fallbackConfig.apiKey),
+  authDomain: env('VITE_FIREBASE_AUTH_DOMAIN', fallbackConfig.authDomain),
+  projectId: env('VITE_FIREBASE_PROJECT_ID', fallbackConfig.projectId),
   storageBucket: normalizeStorageBucket(
-    env('VITE_FIREBASE_STORAGE_BUCKET'),
+    env('VITE_FIREBASE_STORAGE_BUCKET', fallbackConfig.storageBucket),
   ),
-  messagingSenderId: env('VITE_FIREBASE_MESSAGING_SENDER_ID'),
-  appId: env('VITE_FIREBASE_APP_ID'),
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+  messagingSenderId: env(
+    'VITE_FIREBASE_MESSAGING_SENDER_ID',
+    fallbackConfig.messagingSenderId,
+  ),
+  appId: env('VITE_FIREBASE_APP_ID', fallbackConfig.appId),
+  measurementId: env('VITE_FIREBASE_MEASUREMENT_ID', fallbackConfig.measurementId),
 };
 
 export const firebaseApp = initializeApp(firebaseConfig);
