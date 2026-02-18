@@ -37,17 +37,17 @@ export function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-100 via-purple-100 to-pink-200">
-      <Card className="w-full max-w-md shadow-2xl border-4 border-pink-300 bg-pink-50">
+    <div className="min-h-screen flex items-center justify-center retro-desktop">
+      <Card className="w-full max-w-md">
         <CardHeader className="space-y-4 text-center">
           <div className="flex justify-center">
-            <div className="w-20 h-20 bg-gradient-to-br from-pink-400 to-purple-400 rounded-3xl flex items-center justify-center shadow-lg pixel-corners">
-              <Heart className="w-10 h-10 text-white fill-white" />
+            <div className="w-20 h-20 bg-[#f3a3cd] border-[3px] border-[#2a2334] rounded-[14px] flex items-center justify-center shadow-[0_3px_0_#2a2334] pixel-corners">
+              <Heart className="w-10 h-10 text-[#2a2334] fill-[#2a2334]" />
             </div>
           </div>
           <div>
-            <CardTitle className="text-3xl text-pink-600">✨ Workout Tracker ✨</CardTitle>
-            <CardDescription className="mt-2 text-purple-600 text-base">
+            <CardTitle className="text-3xl text-[#2a2334]">NORMALIZACIJA OS</CardTitle>
+            <CardDescription className="mt-2 text-[#5a4b62] text-base">
               Sign in with Firebase Auth (first login creates your account)
             </CardDescription>
           </div>
@@ -55,7 +55,7 @@ export function Login() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-pink-700">Email</Label>
+              <Label htmlFor="email" className="text-[#2a2334]">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -63,11 +63,11 @@ export function Login() {
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full border-2 border-pink-300 focus:border-pink-400"
+                className="w-full"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-pink-700">Password</Label>
+              <Label htmlFor="password" className="text-[#2a2334]">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -75,7 +75,7 @@ export function Login() {
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full border-2 border-pink-300 focus:border-pink-400"
+                className="w-full"
               />
             </div>
             {error && (
@@ -86,9 +86,9 @@ export function Login() {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 text-white text-lg h-12"
+              className="w-full text-lg h-12"
             >
-              {isSubmitting ? 'Signing in...' : '♡ Login ♡'}
+              {isSubmitting ? 'Signing in...' : 'Login'}
             </Button>
           </form>
         </CardContent>

@@ -70,38 +70,36 @@ export function Library() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-pink-200 p-8">
+    <div className="min-h-screen retro-desktop p-8">
       <div className="max-w-5xl mx-auto space-y-6">
         <div>
-          <h1 className="text-4xl font-bold text-indigo-700">Library</h1>
-          <p className="text-indigo-600 mt-1 text-lg">Track books, reviews and ratings.</p>
+          <h1 className="text-4xl font-bold text-[#2a2334]">Library</h1>
+          <p className="text-[#5a4b62] mt-1 text-lg">Track books, reviews and ratings.</p>
         </div>
 
-        <Card className="border-4 border-indigo-300 bg-gradient-to-br from-indigo-50 to-sky-50 shadow-lg">
+        <Card>
           <CardContent className="p-6">
             <form onSubmit={handleAddBook} className="space-y-4">
               <div>
-                <Label htmlFor="book-title" className="text-indigo-700">Book title</Label>
+                <Label htmlFor="book-title" className="text-[#2a2334]">Book title</Label>
                 <Input
                   id="book-title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Book name"
-                  className="border-2 border-indigo-300"
                 />
               </div>
               <div>
-                <Label htmlFor="book-review" className="text-indigo-700">Short review</Label>
+                <Label htmlFor="book-review" className="text-[#2a2334]">Short review</Label>
                 <Textarea
                   id="book-review"
                   value={review}
                   onChange={(e) => setReview(e.target.value)}
                   placeholder="What did you think?"
-                  className="border-2 border-indigo-300 bg-white"
                 />
               </div>
               <div>
-                <Label className="text-indigo-700">Rating</Label>
+                <Label className="text-[#2a2334]">Rating</Label>
                 <div className="flex gap-2 mt-1">
                   {RATING_OPTIONS.map((value) => (
                     <button
@@ -120,23 +118,22 @@ export function Library() {
                 </div>
               </div>
               <div>
-                <Label htmlFor="book-image" className="text-indigo-700">Book image (optional)</Label>
+                <Label htmlFor="book-image" className="text-[#2a2334]">Book image (optional)</Label>
                 <Input
                   id="book-image"
                   type="file"
                   accept="image/*"
                   onChange={handleImageUpload}
-                  className="border-2 border-indigo-300"
                 />
                 {imagePreview && (
                   <img
                     src={imagePreview}
                     alt="Book preview"
-                    className="w-28 h-40 object-cover rounded-lg mt-2 border-2 border-indigo-300"
+                    className="w-28 h-40 object-cover rounded-[10px] mt-2 border-2 border-[#2a2334]"
                   />
                 )}
               </div>
-              <Button type="submit" disabled={isSubmitting} className="bg-indigo-600 hover:bg-indigo-700 text-white">
+              <Button type="submit" disabled={isSubmitting} className="bg-[#b9a7de] hover:bg-[#d1c0f1]">
                 <Plus className="w-4 h-4 mr-1" />
                 {isSubmitting ? 'Saving...' : 'Add Book'}
               </Button>
@@ -146,28 +143,28 @@ export function Library() {
 
         <div className="space-y-3">
           {libraryItems.length === 0 ? (
-            <Card className="border-2 border-indigo-200">
-              <CardContent className="p-8 text-center text-indigo-400">
-                <BookOpen className="w-10 h-10 mx-auto mb-2" />
+            <Card>
+              <CardContent className="p-8 text-center text-[#5a4b62]">
+                <BookOpen className="w-10 h-10 mx-auto mb-2 text-[#2a2334]" />
                 No books yet.
               </CardContent>
             </Card>
           ) : (
             libraryItems.map((item) => (
-              <Card key={item.id} className="border-2 border-indigo-200 bg-white">
+              <Card key={item.id}>
                 <CardContent className="p-4 flex gap-4">
                   {item.image ? (
-                    <img src={item.image} alt={item.title} className="w-20 h-28 rounded object-cover" />
+                    <img src={item.image} alt={item.title} className="w-20 h-28 rounded-[10px] object-cover border-2 border-[#2a2334]" />
                   ) : (
-                    <div className="w-20 h-28 rounded bg-indigo-100 flex items-center justify-center text-indigo-500">
+                    <div className="w-20 h-28 rounded-[10px] bg-[#f7efcf] border-2 border-[#2a2334] flex items-center justify-center text-[#2a2334]">
                       <BookOpen className="w-8 h-8" />
                     </div>
                   )}
                   <div className="flex-1">
                     <div className="flex items-start justify-between">
                       <div>
-                        <h3 className="text-lg font-semibold text-indigo-700">{item.title}</h3>
-                        <p className="text-xs text-indigo-500">
+                        <h3 className="text-lg font-semibold text-[#2a2334]">{item.title}</h3>
+                        <p className="text-xs text-[#5a4b62]">
                           {format(parseISO(item.createdAt), 'MMM d, yyyy')}
                         </p>
                       </div>
@@ -175,7 +172,7 @@ export function Library() {
                         variant="ghost"
                         size="sm"
                         onClick={() => void handleDelete(item.id)}
-                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        className=""
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -190,7 +187,7 @@ export function Library() {
                         />
                       ))}
                     </div>
-                    <p className="text-sm text-slate-700 mt-2">{item.review}</p>
+                    <p className="text-sm text-[#2a2334] mt-2">{item.review}</p>
                   </div>
                 </CardContent>
               </Card>

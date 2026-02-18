@@ -15,7 +15,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (isAuthLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-100 via-purple-100 to-pink-200">
+      <div className="min-h-screen flex items-center justify-center retro-desktop">
         <p className="text-lg text-purple-700 font-semibold">Loading your account...</p>
       </div>
     );
@@ -33,7 +33,7 @@ function PublicRoute() {
 
   if (isAuthLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-100 via-purple-100 to-pink-200">
+      <div className="min-h-screen flex items-center justify-center retro-desktop">
         <p className="text-lg text-purple-700 font-semibold">Loading your account...</p>
       </div>
     );

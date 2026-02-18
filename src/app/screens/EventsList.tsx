@@ -28,7 +28,7 @@ export function EventsList() {
 
     try {
       await deleteWorkout(id);
-      toast.success('Workout deleted! ✨');
+      toast.success('Workout deleted!');
     } catch {
       toast.error('Could not delete workout.');
     }
@@ -38,36 +38,36 @@ export function EventsList() {
   const averageExercisesPerWorkout = workouts.length > 0 ? (totalExercises / workouts.length).toFixed(1) : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-pink-200 p-8">
+    <div className="min-h-screen retro-desktop p-8">
       <div className="max-w-5xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-pink-600">✨ Workout History ✨</h1>
-            <p className="text-purple-600 mt-1 text-lg">
+            <h1 className="text-4xl font-bold text-[#2a2334]">Workout History</h1>
+            <p className="text-[#5a4b62] mt-1 text-lg">
               {workouts.length} {workouts.length === 1 ? 'workout' : 'workouts'} logged
             </p>
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <Card className="border-4 border-pink-300 bg-white">
+          <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <TrendingUp className="w-8 h-8 text-pink-500" />
+                <TrendingUp className="w-8 h-8 text-[#2a2334]" />
                 <div>
-                  <div className="text-2xl font-bold text-pink-600">{totalExercises}</div>
-                  <p className="text-sm text-purple-600">Total Exercises</p>
+                  <div className="text-2xl font-bold text-[#2a2334]">{totalExercises}</div>
+                  <p className="text-sm text-[#5a4b62]">Total Exercises</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          <Card className="border-4 border-purple-300 bg-white">
+          <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <Heart className="w-8 h-8 text-purple-500 fill-purple-500" />
+                <Heart className="w-8 h-8 text-[#2a2334] fill-[#f3a3cd]" />
                 <div>
-                  <div className="text-2xl font-bold text-purple-600">{averageExercisesPerWorkout}</div>
-                  <p className="text-sm text-pink-600">Avg per Workout</p>
+                  <div className="text-2xl font-bold text-[#2a2334]">{averageExercisesPerWorkout}</div>
+                  <p className="text-sm text-[#5a4b62]">Avg per Workout</p>
                 </div>
               </div>
             </CardContent>
@@ -75,18 +75,18 @@ export function EventsList() {
         </div>
 
         {sortedWorkouts.length === 0 ? (
-          <Card className="border-4 border-pink-300 bg-white">
+          <Card>
             <CardContent className="flex flex-col items-center justify-center py-16">
-              <Heart className="w-16 h-16 text-pink-300 mb-4" />
-              <h3 className="text-lg font-semibold text-pink-600 mb-2">No workouts yet!</h3>
-              <p className="text-purple-600 mb-6 text-center max-w-sm">
-                Start your fitness journey by logging your first workout 💪
+              <Heart className="w-16 h-16 text-[#2a2334] fill-[#f3a3cd] mb-4" />
+              <h3 className="text-lg font-semibold text-[#2a2334] mb-2">No workouts yet!</h3>
+              <p className="text-[#5a4b62] mb-6 text-center max-w-sm">
+                Start your fitness journey by logging your first workout.
               </p>
               <Button
                 onClick={() => navigate('/dashboard')}
-                className="bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500"
+                className="bg-[#f3a3cd] hover:bg-[#ffbadf]"
               >
-                ♡ Add Your First Workout ♡
+                Add Your First Workout
               </Button>
             </CardContent>
           </Card>
@@ -95,7 +95,7 @@ export function EventsList() {
             {sortedWorkouts.map((workout) => (
               <Card
                 key={workout.id}
-                className="border-4 border-pink-300 bg-white hover:shadow-xl transition-shadow"
+                className="hover:shadow-xl transition-shadow"
               >
                 <CardContent className="p-6">
                   <div className="flex gap-6">
@@ -103,11 +103,11 @@ export function EventsList() {
                       <img
                         src={workout.imageUrl}
                         alt="Workout"
-                        className="w-32 h-32 rounded-xl object-cover flex-shrink-0 border-4 border-pink-200"
+                        className="w-32 h-32 rounded-[10px] object-cover flex-shrink-0 border-[3px] border-[#2a2334]"
                       />
                     ) : (
-                      <div className="w-32 h-32 rounded-xl bg-gradient-to-br from-pink-200 to-purple-200 flex items-center justify-center flex-shrink-0 border-4 border-pink-300">
-                        <Heart className="w-12 h-12 text-pink-500 fill-pink-500" />
+                      <div className="w-32 h-32 rounded-[10px] bg-[#f7efcf] flex items-center justify-center flex-shrink-0 border-[3px] border-[#2a2334]">
+                        <Heart className="w-12 h-12 text-[#2a2334] fill-[#f3a3cd]" />
                       </div>
                     )}
 
@@ -115,13 +115,13 @@ export function EventsList() {
                       <div className="flex items-start justify-between">
                         <div>
                           <div className="flex items-center gap-3 mb-2">
-                            <Calendar className="w-5 h-5 text-pink-500" />
-                            <h3 className="text-xl font-bold text-pink-600">
+                            <Calendar className="w-5 h-5 text-[#2a2334]" />
+                            <h3 className="text-xl font-bold text-[#2a2334]">
                               {format(parseISO(workout.date), 'EEEE, MMMM d, yyyy')}
                             </h3>
                           </div>
                           {workout.bodyWeight && (
-                            <div className="flex items-center gap-2 text-purple-600">
+                            <div className="flex items-center gap-2 text-[#5a4b62]">
                               <Scale className="w-4 h-4" />
                               <span className="font-medium">Body Weight: {workout.bodyWeight}kg</span>
                             </div>
@@ -132,7 +132,7 @@ export function EventsList() {
                             variant="ghost"
                             size="sm"
                             onClick={() => void handleDelete(workout.id)}
-                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                            className=""
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
@@ -143,7 +143,7 @@ export function EventsList() {
                               setEditWorkout(workout);
                               setIsModalOpen(true);
                             }}
-                            className="text-blue-500 hover:text-blue-700 hover:bg-blue-50"
+                            className=""
                           >
                             <Edit className="w-4 h-4" />
                           </Button>
@@ -151,19 +151,19 @@ export function EventsList() {
                       </div>
 
                       <div className="space-y-2">
-                        <h4 className="font-semibold text-pink-600">Exercises:</h4>
+                        <h4 className="font-semibold text-[#2a2334]">Exercises:</h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                           {workout.exercises.map((exercise, idx) => (
                             <div
                               key={idx}
-                              className="flex items-center gap-2 p-2 bg-pink-50 rounded-lg border-2 border-pink-200"
+                              className="flex items-center gap-2 p-2 bg-[#f7efcf] rounded-[10px] border-2 border-[#2a2334]"
                             >
-                              <span className="text-xl">💪</span>
+                              <span className="text-xl">#</span>
                               <div className="flex-1">
-                                <div className="font-medium text-pink-700">{exercise.name}</div>
-                                <div className="text-sm text-purple-600">
+                                <div className="font-medium text-[#2a2334]">{exercise.name}</div>
+                                <div className="text-sm text-[#5a4b62]">
                                   {exercise.sets && exercise.reps && (
-                                    <span>{exercise.sets} sets × {exercise.reps} reps</span>
+                                    <span>{exercise.sets} sets x {exercise.reps} reps</span>
                                   )}
                                   {exercise.weight && (
                                     <span className="ml-2">@ {exercise.weight}kg</span>
@@ -176,8 +176,8 @@ export function EventsList() {
                       </div>
 
                       {workout.notes && (
-                        <div className="border-l-4 border-pink-300 pl-3 py-1">
-                          <p className="text-sm text-purple-600 italic">"{workout.notes}"</p>
+                        <div className="border-l-4 border-[#b9a7de] pl-3 py-1">
+                          <p className="text-sm text-[#5a4b62] italic">"{workout.notes}"</p>
                         </div>
                       )}
                     </div>

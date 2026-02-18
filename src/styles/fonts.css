@@ -1,0 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Jersey+10&display=swap');
+
+@font-face {
+  font-family: "Argent Pixel CF Regular";
+  src:
+    local("Argent Pixel CF Regular"),
+    local("Argent Pixel CF"),
+    local("ArgentPixelCF-Regular");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}

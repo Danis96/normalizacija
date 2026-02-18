@@ -21,7 +21,7 @@ export function WheneverTodoList() {
     try {
       await addTodo(newTodoText);
       setNewTodoText('');
-      toast.success('Task added to "Whenever" list! ✨');
+      toast.success('Task added to "Whenever" list.');
     } catch {
       toast.error('Could not add task.');
     }
@@ -38,7 +38,7 @@ export function WheneverTodoList() {
   const handleDelete = async (id: string) => {
     try {
       await deleteTodo(id);
-      toast.success('Task removed! 🗑️');
+      toast.success('Task removed.');
     } catch {
       toast.error('Could not remove task.');
     }
@@ -48,24 +48,24 @@ export function WheneverTodoList() {
   const totalCount = todos.length;
 
   return (
-    <Card className="border-4 border-purple-300 bg-gradient-to-br from-purple-50 to-pink-50 shadow-lg">
+    <Card>
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <Clock className="w-5 h-5 text-purple-500" />
-              <h3 className="text-xl font-bold text-purple-600">Whenever Tasks</h3>
+              <Clock className="w-5 h-5 text-[#2a2334]" />
+              <h3 className="text-xl font-bold text-[#2a2334]">Whenever Tasks</h3>
             </div>
-            <p className="text-sm text-pink-600">
+            <p className="text-sm text-[#5a4b62]">
               Things to do when you have free time
             </p>
           </div>
           {totalCount > 0 && (
             <div className="text-right">
-              <div className="text-2xl font-bold text-purple-600">
+              <div className="text-2xl font-bold text-[#2a2334]">
                 {completedCount}/{totalCount}
               </div>
-              <p className="text-xs text-pink-600">completed</p>
+              <p className="text-xs text-[#5a4b62]">completed</p>
             </div>
           )}
         </div>
@@ -76,13 +76,9 @@ export function WheneverTodoList() {
               value={newTodoText}
               onChange={(e) => setNewTodoText(e.target.value)}
               placeholder="Add a task for later..."
-              className="flex-1 border-2 border-purple-300 focus:border-purple-400 bg-white"
+              className="flex-1"
             />
-            <Button
-              type="submit"
-              size="sm"
-              className="bg-gradient-to-r from-purple-400 to-pink-400 hover:from-purple-500 hover:to-pink-500 text-white"
-            >
+            <Button type="submit" size="sm" className="bg-[#b9a7de] hover:bg-[#d1c0f1]">
               <Plus className="w-4 h-4 mr-1" />
               Add
             </Button>
@@ -91,25 +87,24 @@ export function WheneverTodoList() {
 
         <div className="space-y-2 max-h-96 overflow-y-auto">
           {todos.length === 0 ? (
-            <div className="text-center py-8 text-pink-400">
-              <p>No tasks yet! 🌟</p>
+            <div className="text-center py-8 text-[#8b7b94]">
+              <p>No tasks yet.</p>
               <p className="text-sm mt-1">Add tasks to do whenever you have time</p>
             </div>
           ) : (
             todos.map((todo) => (
               <div
                 key={todo.id}
-                className="flex items-center gap-3 p-3 bg-white rounded-lg border-2 border-purple-200 hover:border-purple-300 transition-colors group"
+                className="flex items-center gap-3 p-3 bg-[#f7efcf] rounded-[10px] border-2 border-[#2a2334] transition-colors group"
               >
                 <Checkbox
                   id={`todo-${todo.id}`}
                   checked={todo.completed}
                   onCheckedChange={() => void handleToggle(todo.id)}
-                  className="border-2 border-purple-300 data-[state=checked]:bg-purple-500"
                 />
                 <label
                   htmlFor={`todo-${todo.id}`}
-                  className={`flex-1 cursor-pointer text-purple-700 ${
+                  className={`flex-1 cursor-pointer text-[#2a2334] ${
                     todo.completed ? 'line-through opacity-50' : ''
                   }`}
                 >
@@ -119,7 +114,7 @@ export function WheneverTodoList() {
                   variant="ghost"
                   size="sm"
                   onClick={() => void handleDelete(todo.id)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:text-red-700 hover:bg-red-50"
+                  className="opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>

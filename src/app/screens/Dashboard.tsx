@@ -12,7 +12,7 @@ import { WorkoutLog } from '../context/AppContext';
 import { ChevronLeft, ChevronRight, Plus, Heart, TrendingUp, Scale, RotateCcw } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, parseISO, isFuture, isToday } from 'date-fns';
 const HEADER_IMAGE_URL =
-  'https://placehold.co/1200x192/ffb6c1/fff?text=Header';
+  'https://placehold.co/1200x192/e8dfca/2a2334?text=Normalizacija+Desktop';
 
 const DEFAULT_SECTION_ORDER = [
   'upcoming-workout',
@@ -150,29 +150,29 @@ export function Dashboard() {
       case 'upcoming-workout':
         if (!upcomingWorkout) return null;
         return (
-          <Card className="border-4 border-pink-300 bg-gradient-to-br from-pink-50 to-purple-50 shadow-lg">
+          <Card>
             <CardContent className="p-6">
               <div className="flex items-center gap-3 mb-3">
-                <Heart className="w-6 h-6 text-pink-500 fill-pink-500" />
-                <h2 className="text-xl font-semibold text-pink-600">
+                <Heart className="w-6 h-6 text-[#2a2334] fill-[#f3a3cd]" />
+                <h2 className="text-xl font-semibold text-[#2a2334]">
                   {isToday(parseISO(upcomingWorkout.date)) ? "Today's Workout" : 'Next Workout'}
                 </h2>
               </div>
               <div className="space-y-2">
-                <p className="text-purple-600 font-medium">
+                <p className="text-[#5a4b62] font-medium">
                   {format(parseISO(upcomingWorkout.date), 'EEEE, MMMM d, yyyy')}
                 </p>
                 {upcomingWorkout.exercises.length > 0 && (
                   <div className="space-y-1">
                     {upcomingWorkout.exercises.slice(0, 3).map((ex, idx) => (
-                      <div key={idx} className="text-sm text-pink-700">
+                      <div key={idx} className="text-sm text-[#2a2334]">
                         {ex.name} {ex.sets && ex.reps ? `- ${ex.sets}x${ex.reps}` : ''} {ex.weight ? `@ ${ex.weight}kg` : ''}
                       </div>
                     ))}
                   </div>
                 )}
                 {upcomingWorkout.notes && (
-                  <p className="text-sm text-purple-600 border-l-4 border-pink-300 pl-3 mt-2">
+                  <p className="text-sm text-[#5a4b62] border-l-4 border-[#b9a7de] pl-3 mt-2">
                     {upcomingWorkout.notes}
                   </p>
                 )}
@@ -184,29 +184,29 @@ export function Dashboard() {
       case 'stats':
         return (
           <div className="grid grid-cols-3 gap-4">
-            <Card className="border-4 border-pink-300 bg-white">
+            <Card>
               <CardContent className="p-4 text-center">
-                <TrendingUp className="w-8 h-8 text-pink-500 mx-auto mb-2" />
-                <div className="text-3xl font-bold text-pink-600">{totalWorkouts}</div>
-                <p className="text-sm text-purple-600">Total Workouts</p>
+                <TrendingUp className="w-8 h-8 text-[#2a2334] mx-auto mb-2" />
+                <div className="text-3xl font-bold text-[#2a2334]">{totalWorkouts}</div>
+                <p className="text-sm text-[#5a4b62]">Total Workouts</p>
               </CardContent>
             </Card>
-            <Card className="border-4 border-purple-300 bg-white">
+            <Card>
               <CardContent className="p-4 text-center">
-                <Scale className="w-8 h-8 text-purple-500 mx-auto mb-2" />
-                <div className="text-3xl font-bold text-purple-600">
+                <Scale className="w-8 h-8 text-[#2a2334] mx-auto mb-2" />
+                <div className="text-3xl font-bold text-[#2a2334]">
                   {latestWeight ? `${latestWeight}kg` : '--'}
                 </div>
-                <p className="text-sm text-pink-600">Current Weight</p>
+                <p className="text-sm text-[#5a4b62]">Current Weight</p>
               </CardContent>
             </Card>
-            <Card className="border-4 border-pink-300 bg-white">
+            <Card>
               <CardContent className="p-4 text-center">
-                <Heart className="w-8 h-8 text-pink-500 fill-pink-500 mx-auto mb-2" />
-                <div className="text-3xl font-bold text-pink-600">
+                <Heart className="w-8 h-8 text-[#2a2334] fill-[#f3a3cd] mx-auto mb-2" />
+                <div className="text-3xl font-bold text-[#2a2334]">
                   {workouts.reduce((acc, w) => acc + w.exercises.length, 0)}
                 </div>
-                <p className="text-sm text-purple-600">Total Exercises</p>
+                <p className="text-sm text-[#5a4b62]">Total Exercises</p>
               </CardContent>
             </Card>
           </div>
@@ -217,10 +217,10 @@ export function Dashboard() {
 
       case 'calendar':
         return (
-          <Card className="border-4 border-pink-300 bg-white shadow-lg">
+          <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-pink-600">
+                <h2 className="text-2xl font-bold text-[#2a2334]">
                   {format(currentDate, 'MMMM yyyy')}
                 </h2>
                 <div className="flex gap-2">
@@ -228,7 +228,7 @@ export function Dashboard() {
                     variant="outline" 
                     size="sm" 
                     onClick={handlePrevMonth}
-                    className="border-2 border-pink-300 text-pink-600 hover:bg-pink-50"
+                    className="text-[#2a2334]"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </Button>
@@ -236,7 +236,7 @@ export function Dashboard() {
                     variant="outline"
                     size="sm"
                     onClick={() => setCurrentDate(new Date())}
-                    className="border-2 border-pink-300 text-pink-600 hover:bg-pink-50"
+                    className="text-[#2a2334]"
                   >
                     Today
                   </Button>
@@ -244,14 +244,14 @@ export function Dashboard() {
                     variant="outline" 
                     size="sm" 
                     onClick={handleNextMonth}
-                    className="border-2 border-pink-300 text-pink-600 hover:bg-pink-50"
+                    className="text-[#2a2334]"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </Button>
                   <Button
                     onClick={handleAddWorkout}
                     size="sm"
-                    className="ml-4 bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 text-white"
+                    className="ml-4 bg-[#f3a3cd] hover:bg-[#ffbadf]"
                   >
                     <Plus className="w-4 h-4 mr-1" />
                     Add Workout
@@ -263,7 +263,7 @@ export function Dashboard() {
                 {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
                   <div
                     key={day}
-                    className="text-center font-bold text-purple-600 py-2"
+                    className="text-center font-bold text-[#2a2334] py-2"
                   >
                     {day}
                   </div>
@@ -282,18 +282,18 @@ export function Dashboard() {
                       className={`min-h-24 p-2 border-2 rounded-xl cursor-pointer transition-all ${
                         isCurrentMonth
                           ? hasWorkout 
-                            ? 'bg-gradient-to-br from-pink-100 to-purple-100 border-pink-400 hover:shadow-md'
-                            : 'bg-white hover:bg-pink-50 border-pink-200'
-                          : 'bg-gray-50 border-gray-200 text-gray-400'
-                      } ${isTodayDate ? 'ring-4 ring-pink-400' : ''}`}
+                            ? 'bg-[#ffecf7] border-[#2a2334] hover:shadow-md'
+                            : 'bg-[#f7efcf] border-[#2a2334]'
+                          : 'bg-[#e6dcc0] border-[#b9ad8b] text-[#8b7b94]'
+                      } ${isTodayDate ? 'ring-2 ring-[#4b37ef]' : ''}`}
                       onClick={() => handleDayClick(day)}
                     >
                       <div className="flex items-center justify-center mb-1">
                         <span
                           className={`text-sm font-semibold ${
                             isTodayDate
-                              ? 'w-7 h-7 flex items-center justify-center bg-pink-500 text-white rounded-full'
-                              : hasWorkout ? 'text-pink-600' : ''
+                              ? 'w-7 h-7 flex items-center justify-center bg-[#4b37ef] text-white rounded-full'
+                              : hasWorkout ? 'text-[#2a2334]' : 'text-[#5a4b62]'
                           }`}
                         >
                           {format(day, 'd')}
@@ -304,14 +304,14 @@ export function Dashboard() {
                           {dayWorkouts[0].exercises.slice(0, 2).map((ex, idx) => (
                             <div
                               key={idx}
-                              className="text-xs p-1 bg-pink-200 text-pink-800 rounded truncate"
+                              className="text-xs p-1 bg-[#b8df69] text-[#2a2334] rounded truncate"
                               title={ex.name}
                             >
                               {ex.name}
                             </div>
                           ))}
                           {dayWorkouts[0].exercises.length > 2 && (
-                            <div className="text-xs text-pink-600 text-center">
+                            <div className="text-xs text-[#5a4b62] text-center">
                               +{dayWorkouts[0].exercises.length - 2} more
                             </div>
                           )}
@@ -332,31 +332,31 @@ export function Dashboard() {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-pink-200 p-8">
+      <div className="min-h-screen retro-desktop p-8">
         <div className="max-w-6xl mx-auto space-y-6">
           {/* Header with cute image - always on top, not draggable */}
           <div className="relative">
             <img 
               src={HEADER_IMAGE_URL} 
               alt="Cute Header" 
-              className="w-full h-48 object-cover rounded-3xl border-4 border-pink-300 shadow-lg"
+              className="w-full h-48 object-cover rounded-[14px] border-[3px] border-[#2a2334] shadow-[0_5px_0_#2a2334]"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-pink-200/80 to-transparent rounded-3xl" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#f3a3cd]/35 to-transparent rounded-[14px]" />
             <div className="absolute bottom-4 left-6">
-              <h1 className="text-4xl font-bold text-pink-600 drop-shadow-lg">Workout Tracker</h1>
+              <h1 className="text-4xl font-bold text-[#2a2334] drop-shadow-lg">Workout Tracker</h1>
             </div>
           </div>
 
           {/* Reorder hint + reset button */}
           <div className="flex items-center justify-between">
-            <p className="text-xs text-purple-400 italic">
+            <p className="text-xs text-[#5a4b62] italic">
               Hover on the left edge of any section & drag to reorder
             </p>
             <Button
               variant="outline"
               size="sm"
               onClick={handleResetOrder}
-              className="border-2 border-purple-300 text-purple-500 hover:bg-purple-50 gap-1"
+              className="text-[#2a2334] gap-1"
             >
               <RotateCcw className="w-3 h-3" />
               Reset Layout

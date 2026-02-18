@@ -1,36 +1,36 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --font-size: 16px;
-  --background: #ffffff;
-  --foreground: oklch(0.145 0 0);
-  --card: #ffffff;
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: #030213;
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.95 0.0058 264.53);
-  --secondary-foreground: #030213;
-  --muted: #ececf0;
-  --muted-foreground: #717182;
-  --accent: #e9ebef;
-  --accent-foreground: #030213;
-  --destructive: #d4183d;
+  --font-size: 19px;
+  --background: #e9e2cc;
+  --foreground: #2c2232;
+  --card: #efe5c7;
+  --card-foreground: #2c2232;
+  --popover: #f4ebcf;
+  --popover-foreground: #2c2232;
+  --primary: #b4df63;
+  --primary-foreground: #2a2334;
+  --secondary: #caafdb;
+  --secondary-foreground: #2a2334;
+  --muted: #e6dcbf;
+  --muted-foreground: #5a4b62;
+  --accent: #f3a3cd;
+  --accent-foreground: #2a2334;
+  --destructive: #f07a9f;
   --destructive-foreground: #ffffff;
-  --border: rgba(0, 0, 0, 0.1);
-  --input: transparent;
-  --input-background: #f3f3f5;
-  --switch-background: #cbced4;
+  --border: #2a2334;
+  --input: #f6eecf;
+  --input-background: #f6eecf;
+  --switch-background: #d5c8a3;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --ring: oklch(0.708 0 0);
+  --ring: #4b37ef;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.625rem;
+  --radius: 0.5rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: #030213;
@@ -126,6 +126,11 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: "Argent Pixel CF Regular", "Inter", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", sans-serif;
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(77, 59, 87, 0.15) 1px, transparent 0),
+      linear-gradient(135deg, #ebe4d1 0%, #dfd4b6 50%, #e8dfca 100%);
+    background-size: 24px 24px, 100% 100%;
   }
 
   /**
@@ -141,6 +146,7 @@
     font-size: var(--text-2xl);
     font-weight: var(--font-weight-medium);
     line-height: 1.5;
+    letter-spacing: 0.01em;
   }
 
   h2 {
@@ -177,6 +183,21 @@
     font-size: var(--text-base);
     font-weight: var(--font-weight-normal);
     line-height: 1.5;
+  }
+
+  .retro-desktop {
+    background-image:
+      linear-gradient(90deg, rgba(238, 169, 210, 0.14) 1px, transparent 1px),
+      linear-gradient(0deg, rgba(135, 196, 254, 0.14) 1px, transparent 1px),
+      linear-gradient(145deg, #efe5c9 0%, #e3d7b7 45%, #ebe2c7 100%);
+    background-size: 22px 22px, 22px 22px, 100% 100%;
+  }
+
+  .retro-window {
+    border: 3px solid #2a2334;
+    border-radius: 12px;
+    box-shadow: 0 5px 0 #2a2334;
+    background: #efe5c7;
   }
 
   /* Custom pixel/retro styles */

@@ -858,7 +858,7 @@ export function LanguageLearning() {
   const currentQuestion = quizSession?.questions[quizSession.index];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-pink-200 p-4 md:p-8">
+    <div className="min-h-screen retro-desktop p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex flex-wrap items-center gap-3 justify-between">
           <div>
@@ -1093,13 +1093,13 @@ export function LanguageLearning() {
                           <div>
                             <div className="flex items-center gap-2 flex-wrap">
                               <span className="font-semibold text-pink-700">{word.word}</span>
-                              <span className="text-slate-400">→</span>
+                              <span className="text-slate-400">-&gt;</span>
                               <span className="text-slate-700">{word.translation}</span>
                               {word.partOfSpeech && <Badge variant="outline">{word.partOfSpeech}</Badge>}
                               {word.mastered && <Badge className="bg-green-100 text-green-700">Mastered</Badge>}
                             </div>
                             <div className="text-xs text-slate-500 mt-1">
-                              {word.dateLearned} • Confidence {word.confidence} • ✅ {word.correctCount} / ❌ {word.wrongCount}
+                              {word.dateLearned} | Confidence {word.confidence} | Correct {word.correctCount} / Wrong {word.wrongCount}
                             </div>
                             {word.tags.length > 0 && (
                               <div className="flex flex-wrap gap-1 mt-1">
@@ -1267,8 +1267,8 @@ export function LanguageLearning() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="word-to-translation">Word → Translation</SelectItem>
-                      <SelectItem value="translation-to-word">Translation → Word</SelectItem>
+                      <SelectItem value="word-to-translation">Word -&gt; Translation</SelectItem>
+                      <SelectItem value="translation-to-word">Translation -&gt; Word</SelectItem>
                     </SelectContent>
                   </Select>
 
@@ -1411,7 +1411,7 @@ export function LanguageLearning() {
                         <ul className="text-sm space-y-1 list-disc pl-5">
                           {lastQuizSummary.mistakes.map((item, idx) => (
                             <li key={`${item.wordId}-${idx}`}>
-                              {item.question} • your answer: {item.userAnswer} • correct: {item.correctAnswer}
+                              {item.question} | your answer: {item.userAnswer} | correct: {item.correctAnswer}
                             </li>
                           ))}
                         </ul>

@@ -70,38 +70,36 @@ export function Cinema() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-pink-200 p-8">
+    <div className="min-h-screen retro-desktop p-8">
       <div className="max-w-5xl mx-auto space-y-6">
         <div>
-          <h1 className="text-4xl font-bold text-rose-700">Cinema</h1>
-          <p className="text-rose-600 mt-1 text-lg">Track movies, reviews and star ratings.</p>
+          <h1 className="text-4xl font-bold text-[#2a2334]">Cinema</h1>
+          <p className="text-[#5a4b62] mt-1 text-lg">Track movies, reviews and star ratings.</p>
         </div>
 
-        <Card className="border-4 border-rose-300 bg-gradient-to-br from-rose-50 to-orange-50 shadow-lg">
+        <Card>
           <CardContent className="p-6">
             <form onSubmit={handleAddMovie} className="space-y-4">
               <div>
-                <Label htmlFor="movie-title" className="text-rose-700">Movie title</Label>
+                <Label htmlFor="movie-title" className="text-[#2a2334]">Movie title</Label>
                 <Input
                   id="movie-title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Movie name"
-                  className="border-2 border-rose-300"
                 />
               </div>
               <div>
-                <Label htmlFor="movie-review" className="text-rose-700">Short review</Label>
+                <Label htmlFor="movie-review" className="text-[#2a2334]">Short review</Label>
                 <Textarea
                   id="movie-review"
                   value={review}
                   onChange={(e) => setReview(e.target.value)}
                   placeholder="What did you think?"
-                  className="border-2 border-rose-300 bg-white"
                 />
               </div>
               <div>
-                <Label className="text-rose-700">Rating</Label>
+                <Label className="text-[#2a2334]">Rating</Label>
                 <div className="flex gap-2 mt-1">
                   {RATING_OPTIONS.map((value) => (
                     <button
@@ -120,23 +118,22 @@ export function Cinema() {
                 </div>
               </div>
               <div>
-                <Label htmlFor="movie-image" className="text-rose-700">Movie image (optional)</Label>
+                <Label htmlFor="movie-image" className="text-[#2a2334]">Movie image (optional)</Label>
                 <Input
                   id="movie-image"
                   type="file"
                   accept="image/*"
                   onChange={handleImageUpload}
-                  className="border-2 border-rose-300"
                 />
                 {imagePreview && (
                   <img
                     src={imagePreview}
                     alt="Movie preview"
-                    className="w-40 h-24 object-cover rounded-lg mt-2 border-2 border-rose-300"
+                    className="w-40 h-24 object-cover rounded-[10px] mt-2 border-2 border-[#2a2334]"
                   />
                 )}
               </div>
-              <Button type="submit" disabled={isSubmitting} className="bg-rose-600 hover:bg-rose-700 text-white">
+              <Button type="submit" disabled={isSubmitting} className="bg-[#f3a3cd] hover:bg-[#ffbadf]">
                 <Plus className="w-4 h-4 mr-1" />
                 {isSubmitting ? 'Saving...' : 'Add Movie'}
               </Button>
@@ -146,28 +143,28 @@ export function Cinema() {
 
         <div className="space-y-3">
           {cinemaItems.length === 0 ? (
-            <Card className="border-2 border-rose-200">
-              <CardContent className="p-8 text-center text-rose-400">
-                <Clapperboard className="w-10 h-10 mx-auto mb-2" />
+            <Card>
+              <CardContent className="p-8 text-center text-[#5a4b62]">
+                <Clapperboard className="w-10 h-10 mx-auto mb-2 text-[#2a2334]" />
                 No movies yet.
               </CardContent>
             </Card>
           ) : (
             cinemaItems.map((item) => (
-              <Card key={item.id} className="border-2 border-rose-200 bg-white">
+              <Card key={item.id}>
                 <CardContent className="p-4 flex gap-4">
                   {item.image ? (
-                    <img src={item.image} alt={item.title} className="w-28 h-20 rounded object-cover" />
+                    <img src={item.image} alt={item.title} className="w-28 h-20 rounded-[10px] object-cover border-2 border-[#2a2334]" />
                   ) : (
-                    <div className="w-28 h-20 rounded bg-rose-100 flex items-center justify-center text-rose-500">
+                    <div className="w-28 h-20 rounded-[10px] bg-[#f7efcf] border-2 border-[#2a2334] flex items-center justify-center text-[#2a2334]">
                       <Clapperboard className="w-8 h-8" />
                     </div>
                   )}
                   <div className="flex-1">
                     <div className="flex items-start justify-between">
                       <div>
-                        <h3 className="text-lg font-semibold text-rose-700">{item.title}</h3>
-                        <p className="text-xs text-rose-500">
+                        <h3 className="text-lg font-semibold text-[#2a2334]">{item.title}</h3>
+                        <p className="text-xs text-[#5a4b62]">
                           {format(parseISO(item.createdAt), 'MMM d, yyyy')}
                         </p>
                       </div>
@@ -175,7 +172,7 @@ export function Cinema() {
                         variant="ghost"
                         size="sm"
                         onClick={() => void handleDelete(item.id)}
-                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        className=""
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -190,7 +187,7 @@ export function Cinema() {
                         />
                       ))}
                     </div>
-                    <p className="text-sm text-slate-700 mt-2">{item.review}</p>
+                    <p className="text-sm text-[#2a2334] mt-2">{item.review}</p>
                   </div>
                 </CardContent>
               </Card>

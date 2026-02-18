@@ -42,8 +42,8 @@ export function Layout({ children }: LayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-pink-200">
-      <header className="bg-white/80 backdrop-blur-sm border-b-4 border-pink-300 sticky top-0 z-10">
+    <div className="min-h-screen retro-desktop">
+      <header className="sticky top-0 z-10 border-b-[3px] border-[#2a2334] bg-[#d8bde8] shadow-[0_4px_0_#2a2334]">
         <div className="px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Sheet>
@@ -51,14 +51,14 @@ export function Layout({ children }: LayoutProps) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="text-pink-600 hover:text-pink-700 hover:bg-pink-100"
+                  className="text-[#2a2334]"
                 >
                   <Menu className="w-5 h-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="border-r-4 border-pink-300 bg-white">
+              <SheetContent side="left">
                 <SheetHeader>
-                  <SheetTitle className="text-pink-700">Menu</SheetTitle>
+                  <SheetTitle className="text-[#2a2334]">Control Panel</SheetTitle>
                   <SheetDescription className="sr-only">
                     Main navigation links
                   </SheetDescription>
@@ -71,10 +71,10 @@ export function Layout({ children }: LayoutProps) {
                       <SheetClose asChild key={item.path}>
                         <button
                           onClick={() => navigate(item.path)}
-                          className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors w-full ${
+                          className={`flex items-center gap-3 px-4 py-3 rounded-[10px] transition-colors w-full border-2 border-[#2a2334] ${
                             isActive
-                              ? 'bg-gradient-to-r from-pink-200 to-purple-200 text-pink-700'
-                              : 'text-purple-700 hover:bg-pink-100'
+                              ? 'bg-[#b9df6b] text-[#2a2334]'
+                              : 'bg-[#f6ebcf] text-[#2a2334] hover:bg-[#ffe7f3]'
                           }`}
                         >
                           <Icon className="w-5 h-5" />
@@ -86,15 +86,15 @@ export function Layout({ children }: LayoutProps) {
                 </nav>
               </SheetContent>
             </Sheet>
-            <div className="w-10 h-10 bg-gradient-to-br from-pink-400 to-purple-400 rounded-2xl flex items-center justify-center">
-              <Heart className="w-6 h-6 text-white fill-white" />
+            <div className="w-10 h-10 bg-[#f3a3cd] border-2 border-[#2a2334] rounded-[10px] flex items-center justify-center">
+              <Heart className="w-6 h-6 text-[#2a2334] fill-[#2a2334]" />
             </div>
-            <span className="font-bold text-xl text-pink-600">✨ Workout Tracker</span>
+            <span className="font-bold text-xl text-[#2a2334]">NORMALIZACIJA OS</span>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-purple-600 font-medium">{currentUser}</span>
-            <Avatar className="border-2 border-pink-300">
-              <AvatarFallback className="bg-gradient-to-br from-pink-400 to-purple-400 text-white">
+            <span className="text-sm text-[#2a2334] font-semibold">{currentUser}</span>
+            <Avatar className="border-2 border-[#2a2334]">
+              <AvatarFallback className="bg-[#b9df6b] text-[#2a2334]">
                 {currentUser.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
@@ -102,7 +102,7 @@ export function Layout({ children }: LayoutProps) {
               variant="ghost"
               size="sm"
               onClick={handleLogout}
-              className="gap-2 text-pink-600 hover:text-pink-700 hover:bg-pink-100"
+              className="gap-2"
             >
               <LogOut className="w-4 h-4" />
               Logout

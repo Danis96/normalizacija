@@ -94,10 +94,10 @@ export function AddWorkoutModal({ isOpen, onClose, selectedDate, editWorkout }: 
     try {
       if (editWorkout) {
         await updateWorkout(editWorkout.id, workoutData);
-        toast.success('Workout updated! 💪');
+        toast.success('Workout updated!');
       } else {
         await addWorkout(workoutData);
-        toast.success('Workout logged! 💪');
+        toast.success('Workout logged!');
       }
 
       handleClose();
@@ -152,31 +152,30 @@ export function AddWorkoutModal({ isOpen, onClose, selectedDate, editWorkout }: 
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-pink-50 border-4 border-pink-300">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl text-pink-600">
-            ✨ {editWorkout ? 'Edit Workout' : 'Log Your Workout'} ✨
+          <DialogTitle className="text-2xl text-[#2a2334]">
+            {editWorkout ? 'Edit Workout' : 'Log Workout'}
           </DialogTitle>
-          <DialogDescription className="text-purple-600">
+          <DialogDescription className="text-[#5a4b62]">
             Track your exercises and progress!
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-5 mt-4">
           <div className="space-y-2">
-            <Label htmlFor="date" className="text-pink-700">Date *</Label>
+            <Label htmlFor="date" className="text-[#2a2334]">Date *</Label>
             <Input
               id="date"
               type="date"
               value={formData.date}
               onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              className="border-2 border-pink-300 focus:border-pink-400"
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="bodyWeight" className="text-pink-700">Body Weight (kg)</Label>
+            <Label htmlFor="bodyWeight" className="text-[#2a2334]">Body Weight (kg)</Label>
             <Input
               id="bodyWeight"
               type="number"
@@ -184,18 +183,17 @@ export function AddWorkoutModal({ isOpen, onClose, selectedDate, editWorkout }: 
               value={formData.bodyWeight}
               onChange={(e) => setFormData({ ...formData, bodyWeight: e.target.value })}
               placeholder="Your weight today"
-              className="border-2 border-pink-300 focus:border-pink-400"
             />
           </div>
 
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label className="text-pink-700 text-lg">Exercises *</Label>
+              <Label className="text-[#2a2334] text-lg">Exercises *</Label>
               <Button
                 type="button"
                 onClick={addExercise}
                 size="sm"
-                className="bg-purple-400 hover:bg-purple-500 text-white"
+                className="bg-[#b9a7de] hover:bg-[#d1c0f1]"
               >
                 <Plus className="w-4 h-4 mr-1" />
                 Add Exercise
@@ -204,13 +202,13 @@ export function AddWorkoutModal({ isOpen, onClose, selectedDate, editWorkout }: 
 
             <div className="space-y-3">
               {exercises.map((exercise, index) => (
-                <div key={index} className="p-4 bg-white rounded-lg border-2 border-pink-200 space-y-3">
+                <div key={index} className="p-4 bg-[#f7efcf] rounded-[10px] border-2 border-[#2a2334] space-y-3">
                   <div className="flex gap-2">
                     <Input
                       placeholder="Exercise name (e.g., Bench Press)"
                       value={exercise.name}
                       onChange={(e) => updateExercise(index, 'name', e.target.value)}
-                      className="flex-1 border-2 border-pink-200"
+                      className="flex-1"
                     />
                     {exercises.length > 1 && (
                       <Button
@@ -218,7 +216,7 @@ export function AddWorkoutModal({ isOpen, onClose, selectedDate, editWorkout }: 
                         variant="ghost"
                         size="sm"
                         onClick={() => removeExercise(index)}
-                        className="text-red-500 hover:text-red-700"
+                        className=""
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -230,14 +228,12 @@ export function AddWorkoutModal({ isOpen, onClose, selectedDate, editWorkout }: 
                       placeholder="Sets"
                       value={exercise.sets || ''}
                       onChange={(e) => updateExercise(index, 'sets', e.target.value)}
-                      className="border-2 border-pink-200"
                     />
                     <Input
                       type="number"
                       placeholder="Reps"
                       value={exercise.reps || ''}
                       onChange={(e) => updateExercise(index, 'reps', e.target.value)}
-                      className="border-2 border-pink-200"
                     />
                     <Input
                       type="number"
@@ -245,7 +241,6 @@ export function AddWorkoutModal({ isOpen, onClose, selectedDate, editWorkout }: 
                       placeholder="Weight (kg)"
                       value={exercise.weight || ''}
                       onChange={(e) => updateExercise(index, 'weight', e.target.value)}
-                      className="border-2 border-pink-200"
                     />
                   </div>
                 </div>
@@ -254,29 +249,28 @@ export function AddWorkoutModal({ isOpen, onClose, selectedDate, editWorkout }: 
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="notes" className="text-pink-700">Notes</Label>
+            <Label htmlFor="notes" className="text-[#2a2334]">Notes</Label>
             <Textarea
               id="notes"
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              placeholder="How did you feel? Any PRs? 💪"
+              placeholder="How did you feel? Any personal records?"
               rows={3}
-              className="border-2 border-pink-300 focus:border-pink-400"
             />
           </div>
 
           <div className="space-y-2">
-            <Label className="text-pink-700">Photo (optional)</Label>
+            <Label className="text-[#2a2334]">Photo (optional)</Label>
             {imagePreview ? (
               <div className="relative">
                 <img
                   src={imagePreview}
                   alt="Preview"
-                  className="w-full h-48 object-cover rounded-lg border-4 border-pink-200"
+                  className="w-full h-48 object-cover rounded-[10px] border-[3px] border-[#2a2334]"
                 />
                 <Button
                   type="button"
-                  variant="destructive"
+                  variant="ghost"
                   size="sm"
                   className="absolute top-2 right-2"
                   onClick={() => {
@@ -290,10 +284,10 @@ export function AddWorkoutModal({ isOpen, onClose, selectedDate, editWorkout }: 
             ) : (
               <label
                 htmlFor="image-upload"
-                className="flex flex-col items-center justify-center w-full h-32 border-4 border-dashed border-pink-300 rounded-lg cursor-pointer hover:border-purple-400 hover:bg-pink-100 transition-colors"
+                className="flex flex-col items-center justify-center w-full h-32 border-[3px] border-dashed border-[#2a2334] rounded-[10px] cursor-pointer hover:bg-[#ffecf7] transition-colors"
               >
-                <Upload className="w-8 h-8 text-pink-400 mb-2" />
-                <span className="text-sm text-pink-600">Click to upload a photo</span>
+                <Upload className="w-8 h-8 text-[#2a2334] mb-2" />
+                <span className="text-sm text-[#5a4b62]">Click to upload a photo</span>
                 <input
                   id="image-upload"
                   type="file"
@@ -309,15 +303,15 @@ export function AddWorkoutModal({ isOpen, onClose, selectedDate, editWorkout }: 
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 text-white text-lg h-12"
+              className="flex-1 bg-[#f3a3cd] hover:bg-[#ffbadf] text-lg h-12"
             >
-              {isSubmitting ? 'Saving...' : '♡ Save Workout ♡'}
+              {isSubmitting ? 'Saving...' : 'Save Workout'}
             </Button>
             <Button
               type="button"
               variant="outline"
               onClick={handleClose}
-              className="flex-1 border-2 border-pink-300"
+              className="flex-1"
             >
               Cancel
             </Button>
