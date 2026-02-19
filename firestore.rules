@@ -15,7 +15,16 @@ service cloud.firestore {
       match /workouts/{workoutId} {
         allow read: if isOwner(userId);
         allow create: if isOwner(userId)
-          && request.resource.data.keys().hasOnly(['date', 'exercises', 'bodyWeight', 'notes', 'imageUrl'])
+          && request.resource.data.keys().hasOnly([
+            'date',
+            'workoutType',
+            'exercises',
+            'yogaFlowName',
+            'yogaPoses',
+            'bodyWeight',
+            'notes',
+            'imageUrl'
+          ])
           && request.resource.data.date is string
           && request.resource.data.exercises is list
           && request.resource.data.notes is string;
@@ -36,11 +45,11 @@ service cloud.firestore {
       match /todos/{todoId} {
         allow read: if isOwner(userId);
         allow create: if isOwner(userId)
-          && request.resource.data.keys().hasOnly(['text', 'completed', 'date'])
+          && request.resource.data.keys().hasOnly(['text', 'completed', 'date', 'priority'])
           && request.resource.data.text is string
           && request.resource.data.completed is bool;
         allow update: if isOwner(userId)
-          && request.resource.data.keys().hasOnly(['text', 'completed', 'date'])
+          && request.resource.data.keys().hasOnly(['text', 'completed', 'date', 'priority'])
           && request.resource.data.text is string
           && request.resource.data.completed is bool;
         allow delete: if isOwner(userId);

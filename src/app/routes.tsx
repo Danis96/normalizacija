@@ -8,6 +8,7 @@ import { Spending } from './screens/Spending';
 import { Library } from './screens/Library';
 import { Cinema } from './screens/Cinema';
 import { LanguageLearning } from './screens/LanguageLearning';
+import { LanguageLearningQuizWindow } from './screens/LanguageLearningQuizWindow';
 import { useApp } from './context/AppContext';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -44,6 +45,24 @@ function PublicRoute() {
   }
 
   return <Login />;
+}
+
+function ProtectedFullscreenRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isAuthLoading } = useApp();
+
+  if (isAuthLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center retro-desktop">
+        <p className="text-lg text-purple-700 font-semibold">Loading your account...</p>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <>{children}</>;
 }
 
 export const router = createBrowserRouter([
@@ -105,6 +124,14 @@ export const router = createBrowserRouter([
       <ProtectedRoute>
         <LanguageLearning />
       </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/language-learning/quiz',
+    element: (
+      <ProtectedFullscreenRoute>
+        <LanguageLearningQuizWindow />
+      </ProtectedFullscreenRoute>
     ),
   },
   {

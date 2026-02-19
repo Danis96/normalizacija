@@ -8,6 +8,7 @@ import { Heart, Trash2, Scale, TrendingUp, Calendar, Edit } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
+import React from 'react';
 
 export function EventsList() {
   const { workouts, deleteWorkout } = useApp();
@@ -35,7 +36,9 @@ export function EventsList() {
   };
 
   const totalExercises = workouts.reduce((acc, workout) => acc + workout.exercises.length, 0);
-  const averageExercisesPerWorkout = workouts.length > 0 ? (totalExercises / workouts.length).toFixed(1) : 0;
+  const totalYogaPoses = workouts.reduce((acc, workout) => acc + (workout.yogaPoses?.length ?? 0), 0);
+  const totalMovements = totalExercises + totalYogaPoses;
+  const averageExercisesPerWorkout = workouts.length > 0 ? (totalMovements / workouts.length).toFixed(1) : 0;
 
   return (
     <div className="min-h-screen retro-desktop p-8">
@@ -55,8 +58,8 @@ export function EventsList() {
               <div className="flex items-center gap-3">
                 <TrendingUp className="w-8 h-8 text-[#2a2334]" />
                 <div>
-                  <div className="text-2xl font-bold text-[#2a2334]">{totalExercises}</div>
-                  <p className="text-sm text-[#5a4b62]">Total Exercises</p>
+                  <div className="text-2xl font-bold text-[#2a2334]">{totalMovements}</div>
+                  <p className="text-sm text-[#5a4b62]">Total Movements</p>
                 </div>
               </div>
             </CardContent>
@@ -151,9 +154,22 @@ export function EventsList() {
                       </div>
 
                       <div className="space-y-2">
-                        <h4 className="font-semibold text-[#2a2334]">Exercises:</h4>
+                        <h4 className="font-semibold text-[#2a2334]">
+                          {workout.workoutType === 'yoga' ? 'Yoga Flow:' : 'Exercises:'}
+                        </h4>
+                        {workout.workoutType === 'yoga' && workout.yogaFlowName ? (
+                          <p className="text-sm text-[#5a4b62]">Flow Name: {workout.yogaFlowName}</p>
+                        ) : null}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                          {workout.exercises.map((exercise, idx) => (
+                          {(workout.workoutType === 'yoga'
+                            ? (workout.yogaPoses ?? []).map((pose) => ({
+                                name: pose.name,
+                                sets: pose.durationMinutes,
+                                reps: undefined,
+                                weight: undefined,
+                              }))
+                            : workout.exercises
+                          ).map((exercise, idx) => (
                             <div
                               key={idx}
                               className="flex items-center gap-2 p-2 bg-[#f7efcf] rounded-[10px] border-2 border-[#2a2334]"
@@ -162,10 +178,12 @@ export function EventsList() {
                               <div className="flex-1">
                                 <div className="font-medium text-[#2a2334]">{exercise.name}</div>
                                 <div className="text-sm text-[#5a4b62]">
-                                  {exercise.sets && exercise.reps && (
+                                  {workout.workoutType === 'yoga' ? (
+                                    <span>{exercise.sets ? `${exercise.sets} min` : 'No duration set'}</span>
+                                  ) : exercise.sets && exercise.reps ? (
                                     <span>{exercise.sets} sets x {exercise.reps} reps</span>
-                                  )}
-                                  {exercise.weight && (
+                                  ) : null}
+                                  {workout.workoutType !== 'yoga' && exercise.weight && (
                                     <span className="ml-2">@ {exercise.weight}kg</span>
                                   )}
                                 </div>

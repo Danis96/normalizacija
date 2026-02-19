@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { useApp } from '../context/AppContext';
+import { useTimer } from '../timer/TimerContext';
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from './ui/sheet';
@@ -13,6 +14,7 @@ import {
   ListChecks,
   LogOut,
   Menu,
+  Timer,
   Wallet,
   CheckSquare,
 } from 'lucide-react';
@@ -25,6 +27,13 @@ export function Layout({ children }: LayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout, currentUser } = useApp();
+  const {
+    status: timerStatus,
+    isVisible: isTimerVisible,
+    show: showTimer,
+    start: startTimer,
+    stop: stopTimer,
+  } = useTimer();
 
   const navigationItems = [
     { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
@@ -83,6 +92,41 @@ export function Layout({ children }: LayoutProps) {
                       </SheetClose>
                     );
                   })}
+                  <SheetClose asChild>
+                    <button
+                      onClick={showTimer}
+                      className="flex items-center gap-3 px-4 py-3 rounded-[10px] transition-colors w-full border-2 border-[#2a2334] bg-[#f6ebcf] text-[#2a2334] hover:bg-[#ffe7f3]"
+                      aria-label="Show timer widget"
+                    >
+                      <Timer className="w-5 h-5" />
+                      <span className="font-semibold">{isTimerVisible ? 'Timer Visible' : 'Show Timer'}</span>
+                    </button>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <button
+                      onClick={() => {
+                        showTimer();
+                        startTimer();
+                      }}
+                      className="flex items-center gap-3 px-4 py-3 rounded-[10px] transition-colors w-full border-2 border-[#2a2334] bg-[#b9df6b] text-[#2a2334] hover:bg-[#d2ef8f]"
+                      aria-label="Start timer"
+                    >
+                      <Timer className="w-5 h-5" />
+                      <span className="font-semibold">
+                        {timerStatus === 'running' ? 'Timer Running' : 'Start Timer'}
+                      </span>
+                    </button>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <button
+                      onClick={stopTimer}
+                      className="flex items-center gap-3 px-4 py-3 rounded-[10px] transition-colors w-full border-2 border-[#2a2334] bg-[#ffe7f3] text-[#2a2334] hover:bg-[#ffd4eb]"
+                      aria-label="Stop timer"
+                    >
+                      <Timer className="w-5 h-5" />
+                      <span className="font-semibold">Stop Timer</span>
+                    </button>
+                  </SheetClose>
                 </nav>
               </SheetContent>
             </Sheet>

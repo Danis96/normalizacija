@@ -8,7 +8,7 @@ import {
 } from './ui/dialog';
 import { Button } from './ui/button';
 import { format, parseISO } from 'date-fns';
-import { Edit, Scale, Calendar, Heart } from 'lucide-react';
+import { Edit, Scale, Calendar } from 'lucide-react';
 
 interface ViewWorkoutModalProps {
   isOpen: boolean;
@@ -24,6 +24,8 @@ export function ViewWorkoutModal({ isOpen, onClose, workout, onEdit }: ViewWorko
     onEdit(workout);
     onClose();
   };
+
+  const isYoga = workout.workoutType === 'yoga';
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -43,6 +45,13 @@ export function ViewWorkoutModal({ isOpen, onClose, workout, onEdit }: ViewWorko
               <div className="font-bold text-[#2a2334]">
                 {format(parseISO(workout.date), 'EEEE, MMMM d, yyyy')}
               </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 p-4 bg-[#f7efcf] rounded-[10px] border-2 border-[#2a2334]">
+            <div>
+              <div className="text-sm text-[#5a4b62]">Workout Type</div>
+              <div className="font-bold text-[#2a2334]">{isYoga ? 'Yoga' : 'Strength'}</div>
             </div>
           </div>
 
@@ -67,34 +76,44 @@ export function ViewWorkoutModal({ isOpen, onClose, workout, onEdit }: ViewWorko
             </div>
           )}
 
-          <div>
-            <div className="text-lg font-bold text-[#2a2334] mb-3">Exercises</div>
-            <div className="space-y-3">
-              {workout.exercises.map((exercise, idx) => (
-                <div
-                  key={idx}
-                  className="p-4 bg-[#f7efcf] rounded-[10px] border-2 border-[#2a2334]"
-                >
-                  <div className="flex items-start gap-3">
-                    <span className="text-2xl">#</span>
-                    <div className="flex-1">
-                      <div className="font-bold text-[#2a2334] mb-1">{exercise.name}</div>
-                      <div className="text-sm text-[#5a4b62]">
-                        {exercise.sets && exercise.reps && (
-                          <span className="mr-3">
-                            {exercise.sets} sets x {exercise.reps} reps
-                          </span>
-                        )}
-                        {exercise.weight && (
-                          <span>{exercise.weight} kg</span>
-                        )}
-                      </div>
+          {isYoga ? (
+            <div>
+              <div className="text-lg font-bold text-[#2a2334] mb-3">Yoga Flow</div>
+              {workout.yogaFlowName ? (
+                <p className="text-sm text-[#5a4b62] mb-2">Flow: {workout.yogaFlowName}</p>
+              ) : null}
+              <div className="space-y-3">
+                {(workout.yogaPoses ?? []).map((pose, idx) => (
+                  <div key={idx} className="p-4 bg-[#f7efcf] rounded-[10px] border-2 border-[#2a2334]">
+                    <div className="font-bold text-[#2a2334] mb-1">
+                      {idx + 1}. {pose.name}
+                    </div>
+                    <div className="text-sm text-[#5a4b62]">
+                      {pose.durationMinutes ? `Duration: ${pose.durationMinutes} min` : 'Duration: -'}
+                    </div>
+                    {pose.notes ? <div className="text-sm text-[#5a4b62]">Notes: {pose.notes}</div> : null}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div>
+              <div className="text-lg font-bold text-[#2a2334] mb-3">Exercises</div>
+              <div className="space-y-3">
+                {workout.exercises.map((exercise, idx) => (
+                  <div key={idx} className="p-4 bg-[#f7efcf] rounded-[10px] border-2 border-[#2a2334]">
+                    <div className="font-bold text-[#2a2334] mb-1">{exercise.name}</div>
+                    <div className="text-sm text-[#5a4b62]">
+                      {exercise.sets && exercise.reps ? (
+                        <span className="mr-3">{exercise.sets} sets x {exercise.reps} reps</span>
+                      ) : null}
+                      {exercise.weight ? <span>{exercise.weight} kg</span> : null}
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {workout.notes && (
             <div>
@@ -106,18 +125,11 @@ export function ViewWorkoutModal({ isOpen, onClose, workout, onEdit }: ViewWorko
           )}
 
           <div className="flex gap-3 pt-4">
-            <Button
-              onClick={handleEdit}
-              className="flex-1 bg-[#b9a7de] hover:bg-[#d1c0f1]"
-            >
+            <Button onClick={handleEdit} className="flex-1 bg-[#b9a7de] hover:bg-[#d1c0f1]">
               <Edit className="w-4 h-4 mr-2" />
               Edit Workout
             </Button>
-            <Button
-              onClick={onClose}
-              variant="outline"
-              className="flex-1"
-            >
+            <Button onClick={onClose} variant="outline" className="flex-1">
               Close
             </Button>
           </div>

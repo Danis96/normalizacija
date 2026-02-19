@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useApp, Exercise, WorkoutLog } from '../context/AppContext';
+import { useApp, Exercise, WorkoutLog, type WorkoutType, type YogaPose } from '../context/AppContext';
 import {
   Dialog,
   DialogContent,
@@ -11,8 +11,10 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Upload, X, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import React from 'react';
 
 interface AddWorkoutModalProps {
   isOpen: boolean;
@@ -27,10 +29,13 @@ export function AddWorkoutModal({ isOpen, onClose, selectedDate, editWorkout }: 
     date: selectedDate || '',
     bodyWeight: '',
     notes: '',
+    workoutType: 'strength' as WorkoutType,
+    yogaFlowName: '',
   });
   const [exercises, setExercises] = useState<Exercise[]>([
     { name: '', sets: undefined, reps: undefined, weight: undefined },
   ]);
+  const [yogaPoses, setYogaPoses] = useState<YogaPose[]>([{ name: '', durationMinutes: undefined, notes: '' }]);
   const [imagePreview, setImagePreview] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,16 +46,27 @@ export function AddWorkoutModal({ isOpen, onClose, selectedDate, editWorkout }: 
     }
 
     if (editWorkout) {
+      const workoutType = editWorkout.workoutType ?? 'strength';
       setFormData({
         date: editWorkout.date,
         bodyWeight: editWorkout.bodyWeight?.toString() || '',
         notes: editWorkout.notes || '',
+        workoutType,
+        yogaFlowName: editWorkout.yogaFlowName ?? '',
       });
+
       setExercises(
         editWorkout.exercises && editWorkout.exercises.length > 0
           ? editWorkout.exercises
           : [{ name: '', sets: undefined, reps: undefined, weight: undefined }],
       );
+
+      setYogaPoses(
+        editWorkout.yogaPoses && editWorkout.yogaPoses.length > 0
+          ? editWorkout.yogaPoses
+          : [{ name: '', durationMinutes: undefined, notes: '' }],
+      );
+
       setImagePreview(editWorkout.imageUrl || '');
       setImageFile(null);
       return;
@@ -60,8 +76,11 @@ export function AddWorkoutModal({ isOpen, onClose, selectedDate, editWorkout }: 
       date: selectedDate || '',
       bodyWeight: '',
       notes: '',
+      workoutType: 'strength',
+      yogaFlowName: '',
     });
     setExercises([{ name: '', sets: undefined, reps: undefined, weight: undefined }]);
+    setYogaPoses([{ name: '', durationMinutes: undefined, notes: '' }]);
     setImagePreview('');
     setImageFile(null);
   }, [isOpen, editWorkout, selectedDate]);
@@ -75,14 +94,24 @@ export function AddWorkoutModal({ isOpen, onClose, selectedDate, editWorkout }: 
     }
 
     const validExercises = exercises.filter((exercise) => exercise.name.trim() !== '');
-    if (validExercises.length === 0) {
+    const validYogaPoses = yogaPoses.filter((pose) => pose.name.trim() !== '');
+
+    if (formData.workoutType === 'strength' && validExercises.length === 0) {
       toast.error('Please add at least one exercise');
+      return;
+    }
+
+    if (formData.workoutType === 'yoga' && validYogaPoses.length === 0) {
+      toast.error('Please add at least one yoga pose');
       return;
     }
 
     const workoutData = {
       date: formData.date,
-      exercises: validExercises,
+      workoutType: formData.workoutType,
+      exercises: formData.workoutType === 'strength' ? validExercises : [],
+      yogaFlowName: formData.workoutType === 'yoga' ? formData.yogaFlowName || null : null,
+      yogaPoses: formData.workoutType === 'yoga' ? validYogaPoses : null,
       bodyWeight: formData.bodyWeight ? parseFloat(formData.bodyWeight) : undefined,
       notes: formData.notes,
       imageUrl: !imageFile ? imagePreview || undefined : undefined,
@@ -94,10 +123,10 @@ export function AddWorkoutModal({ isOpen, onClose, selectedDate, editWorkout }: 
     try {
       if (editWorkout) {
         await updateWorkout(editWorkout.id, workoutData);
-        toast.success('Workout updated!');
+        toast.success('Workout updated.');
       } else {
         await addWorkout(workoutData);
-        toast.success('Workout logged!');
+        toast.success('Workout logged.');
       }
 
       handleClose();
@@ -113,8 +142,11 @@ export function AddWorkoutModal({ isOpen, onClose, selectedDate, editWorkout }: 
       date: '',
       bodyWeight: '',
       notes: '',
+      workoutType: 'strength',
+      yogaFlowName: '',
     });
     setExercises([{ name: '', sets: undefined, reps: undefined, weight: undefined }]);
+    setYogaPoses([{ name: '', durationMinutes: undefined, notes: '' }]);
     setImagePreview('');
     setImageFile(null);
     setIsSubmitting(false);
@@ -133,11 +165,11 @@ export function AddWorkoutModal({ isOpen, onClose, selectedDate, editWorkout }: 
   };
 
   const addExercise = () => {
-    setExercises([...exercises, { name: '', sets: undefined, reps: undefined, weight: undefined }]);
+    setExercises((prev) => [{ name: '', sets: undefined, reps: undefined, weight: undefined }, ...prev]);
   };
 
   const removeExercise = (index: number) => {
-    setExercises(exercises.filter((_, i) => i !== index));
+    setExercises((prev) => prev.filter((_, i) => i !== index));
   };
 
   const updateExercise = (index: number, field: keyof Exercise, value: string | number) => {
@@ -150,6 +182,24 @@ export function AddWorkoutModal({ isOpen, onClose, selectedDate, editWorkout }: 
     setExercises(updated);
   };
 
+  const addYogaPose = () => {
+    setYogaPoses((prev) => [{ name: '', durationMinutes: undefined, notes: '' }, ...prev]);
+  };
+
+  const removeYogaPose = (index: number) => {
+    setYogaPoses((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const updateYogaPose = (index: number, field: keyof YogaPose, value: string | number) => {
+    const updated = [...yogaPoses];
+    if (field === 'name' || field === 'notes') {
+      updated[index][field] = value as string;
+    } else {
+      updated[index][field] = value ? Number(value) : undefined;
+    }
+    setYogaPoses(updated);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -158,21 +208,149 @@ export function AddWorkoutModal({ isOpen, onClose, selectedDate, editWorkout }: 
             {editWorkout ? 'Edit Workout' : 'Log Workout'}
           </DialogTitle>
           <DialogDescription className="text-[#5a4b62]">
-            Track your exercises and progress!
+            Track strength or yoga sessions.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-5 mt-4">
-          <div className="space-y-2">
-            <Label htmlFor="date" className="text-[#2a2334]">Date *</Label>
-            <Input
-              id="date"
-              type="date"
-              value={formData.date}
-              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              required
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="date" className="text-[#2a2334]">Date *</Label>
+              <Input
+                id="date"
+                type="date"
+                value={formData.date}
+                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="type" className="text-[#2a2334]">Workout Type *</Label>
+              <Select
+                value={formData.workoutType}
+                onValueChange={(value) => setFormData({ ...formData, workoutType: value as WorkoutType })}
+              >
+                <SelectTrigger id="type">
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="strength">Strength</SelectItem>
+                  <SelectItem value="yoga">Yoga</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
+
+          {formData.workoutType === 'strength' ? (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-[#2a2334] text-lg">Exercises *</Label>
+                <Button type="button" onClick={addExercise} size="sm" className="bg-[#b9a7de] hover:bg-[#d1c0f1]">
+                  <Plus className="w-4 h-4 mr-1" />
+                  Add Exercise
+                </Button>
+              </div>
+
+              <div className="space-y-3">
+                {exercises.map((exercise, index) => (
+                  <div key={index} className="p-4 bg-[#f7efcf] rounded-[10px] border-2 border-[#2a2334] space-y-3">
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Exercise name (e.g., Bench Press)"
+                        value={exercise.name}
+                        onChange={(e) => updateExercise(index, 'name', e.target.value)}
+                        className="flex-1"
+                      />
+                      {exercises.length > 1 && (
+                        <Button type="button" variant="ghost" size="sm" onClick={() => removeExercise(index)}>
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <Input
+                        type="number"
+                        placeholder="Sets"
+                        value={exercise.sets || ''}
+                        onChange={(e) => updateExercise(index, 'sets', e.target.value)}
+                      />
+                      <Input
+                        type="number"
+                        placeholder="Reps"
+                        value={exercise.reps || ''}
+                        onChange={(e) => updateExercise(index, 'reps', e.target.value)}
+                      />
+                      <Input
+                        type="number"
+                        step="0.5"
+                        placeholder="Weight (kg)"
+                        value={exercise.weight || ''}
+                        onChange={(e) => updateExercise(index, 'weight', e.target.value)}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <Label htmlFor="flowName" className="text-[#2a2334]">Yoga Flow Name</Label>
+                <Input
+                  id="flowName"
+                  placeholder="Morning Mobility Flow"
+                  value={formData.yogaFlowName}
+                  onChange={(e) => setFormData({ ...formData, yogaFlowName: e.target.value })}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <Label className="text-[#2a2334] text-lg">Yoga Poses (sequence) *</Label>
+                <Button type="button" onClick={addYogaPose} size="sm" className="bg-[#b9a7de] hover:bg-[#d1c0f1]">
+                  <Plus className="w-4 h-4 mr-1" />
+                  Add Pose
+                </Button>
+              </div>
+
+              <div className="space-y-3">
+                {yogaPoses.map((pose, index) => (
+                  <div key={index} className="p-4 bg-[#f7efcf] rounded-[10px] border-2 border-[#2a2334] space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs px-2 py-1 rounded bg-[#b8df69] border border-[#2a2334] text-[#2a2334]">
+                        {index + 1}
+                      </span>
+                      <Input
+                        placeholder="Pose name (e.g., Downward Dog)"
+                        value={pose.name}
+                        onChange={(e) => updateYogaPose(index, 'name', e.target.value)}
+                        className="flex-1"
+                      />
+                      {yogaPoses.length > 1 && (
+                        <Button type="button" variant="ghost" size="sm" onClick={() => removeYogaPose(index)}>
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      <Input
+                        type="number"
+                        min="1"
+                        placeholder="Duration (minutes)"
+                        value={pose.durationMinutes || ''}
+                        onChange={(e) => updateYogaPose(index, 'durationMinutes', e.target.value)}
+                      />
+                      <Input
+                        placeholder="Pose notes (optional)"
+                        value={pose.notes || ''}
+                        onChange={(e) => updateYogaPose(index, 'notes', e.target.value)}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="bodyWeight" className="text-[#2a2334]">Body Weight (kg)</Label>
@@ -182,70 +360,8 @@ export function AddWorkoutModal({ isOpen, onClose, selectedDate, editWorkout }: 
               step="0.1"
               value={formData.bodyWeight}
               onChange={(e) => setFormData({ ...formData, bodyWeight: e.target.value })}
-              placeholder="Your weight today"
+              placeholder="Optional"
             />
-          </div>
-
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label className="text-[#2a2334] text-lg">Exercises *</Label>
-              <Button
-                type="button"
-                onClick={addExercise}
-                size="sm"
-                className="bg-[#b9a7de] hover:bg-[#d1c0f1]"
-              >
-                <Plus className="w-4 h-4 mr-1" />
-                Add Exercise
-              </Button>
-            </div>
-
-            <div className="space-y-3">
-              {exercises.map((exercise, index) => (
-                <div key={index} className="p-4 bg-[#f7efcf] rounded-[10px] border-2 border-[#2a2334] space-y-3">
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Exercise name (e.g., Bench Press)"
-                      value={exercise.name}
-                      onChange={(e) => updateExercise(index, 'name', e.target.value)}
-                      className="flex-1"
-                    />
-                    {exercises.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeExercise(index)}
-                        className=""
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    <Input
-                      type="number"
-                      placeholder="Sets"
-                      value={exercise.sets || ''}
-                      onChange={(e) => updateExercise(index, 'sets', e.target.value)}
-                    />
-                    <Input
-                      type="number"
-                      placeholder="Reps"
-                      value={exercise.reps || ''}
-                      onChange={(e) => updateExercise(index, 'reps', e.target.value)}
-                    />
-                    <Input
-                      type="number"
-                      step="0.5"
-                      placeholder="Weight (kg)"
-                      value={exercise.weight || ''}
-                      onChange={(e) => updateExercise(index, 'weight', e.target.value)}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
 
           <div className="space-y-2">
@@ -254,7 +370,7 @@ export function AddWorkoutModal({ isOpen, onClose, selectedDate, editWorkout }: 
               id="notes"
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              placeholder="How did you feel? Any personal records?"
+              placeholder="Session notes"
               rows={3}
             />
           </div>
@@ -300,19 +416,10 @@ export function AddWorkoutModal({ isOpen, onClose, selectedDate, editWorkout }: 
           </div>
 
           <div className="flex gap-3 pt-4">
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex-1 bg-[#f3a3cd] hover:bg-[#ffbadf] text-lg h-12"
-            >
+            <Button type="submit" disabled={isSubmitting} className="flex-1 bg-[#f3a3cd] hover:bg-[#ffbadf] text-lg h-12">
               {isSubmitting ? 'Saving...' : 'Save Workout'}
             </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              className="flex-1"
-            >
+            <Button type="button" variant="outline" onClick={handleClose} className="flex-1">
               Cancel
             </Button>
           </div>

@@ -7,6 +7,7 @@ import { Checkbox } from './ui/checkbox';
 import { Plus, Trash2, CheckSquare } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { toast } from 'sonner';
+import React from 'react';
 
 interface DailyTodoListProps {
   date?: string;
@@ -16,7 +17,10 @@ export function DailyTodoList({ date }: DailyTodoListProps) {
   const todayDate = date || format(new Date(), 'yyyy-MM-dd');
   const { getTodosForDate, addTodo, toggleTodo, deleteTodo } = useApp();
   const [newTodoText, setNewTodoText] = useState('');
+  const [priorityText, setPriorityText] = useState('');
   const todos = getTodosForDate(todayDate);
+  const priorityTasks = todos.filter((todo) => todo.priority);
+  const regularTasks = todos.filter((todo) => !todo.priority);
 
   const handleAddTodo = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,11 +29,26 @@ export function DailyTodoList({ date }: DailyTodoListProps) {
     }
 
     try {
-      await addTodo(newTodoText, todayDate);
+      await addTodo(newTodoText, todayDate, false);
       setNewTodoText('');
       toast.success('Task added.');
     } catch {
       toast.error('Could not add task.');
+    }
+  };
+
+  const handleAddPriority = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!priorityText.trim()) {
+      return;
+    }
+
+    try {
+      await addTodo(priorityText, todayDate, true);
+      setPriorityText('');
+      toast.success('Priority task added.');
+    } catch {
+      toast.error('Could not add priority task.');
     }
   };
 
@@ -76,6 +95,21 @@ export function DailyTodoList({ date }: DailyTodoListProps) {
           )}
         </div>
 
+        <form onSubmit={handleAddPriority} className="mb-3">
+          <div className="flex gap-2">
+            <Input
+              value={priorityText}
+              onChange={(e) => setPriorityText(e.target.value)}
+              placeholder="Add priority task for this day..."
+              className="flex-1"
+            />
+            <Button type="submit" size="sm" className="bg-[#f3a3cd] hover:bg-[#ffbadf]">
+              <Plus className="w-4 h-4 mr-1" />
+              Priority
+            </Button>
+          </div>
+        </form>
+
         <form onSubmit={handleAddTodo} className="mb-4">
           <div className="flex gap-2">
             <Input
@@ -84,7 +118,7 @@ export function DailyTodoList({ date }: DailyTodoListProps) {
               placeholder="Add a new task..."
               className="flex-1"
             />
-            <Button type="submit" size="sm" className="bg-[#f3a3cd] hover:bg-[#ffbadf]">
+            <Button type="submit" size="sm" className="bg-[#b9a7de] hover:bg-[#d1c0f1]">
               <Plus className="w-4 h-4 mr-1" />
               Add
             </Button>
@@ -98,10 +132,12 @@ export function DailyTodoList({ date }: DailyTodoListProps) {
               <p className="text-sm mt-1">Add some tasks to get started</p>
             </div>
           ) : (
-            todos.map((todo) => (
+            [...priorityTasks, ...regularTasks].map((todo) => (
               <div
                 key={todo.id}
-                className="flex items-center gap-3 p-3 bg-[#f7efcf] rounded-[10px] border-2 border-[#2a2334] transition-colors group"
+                className={`flex items-center gap-3 p-3 bg-[#f7efcf] rounded-[10px] border-2 border-[#2a2334] transition-colors group ${
+                  todo.priority ? 'ring-2 ring-[#4b37ef]' : ''
+                }`}
               >
                 <Checkbox
                   id={`todo-${todo.id}`}
@@ -114,6 +150,7 @@ export function DailyTodoList({ date }: DailyTodoListProps) {
                     todo.completed ? 'line-through opacity-50' : ''
                   }`}
                 >
+                  {todo.priority ? '[Priority] ' : ''}
                   {todo.text}
                 </label>
                 <Button

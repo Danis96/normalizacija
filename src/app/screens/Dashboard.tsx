@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useRef } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useApp } from '../context/AppContext';
@@ -9,12 +9,16 @@ import { ViewWorkoutModal } from '../components/ViewWorkoutModal';
 import { WaterTracker } from '../components/WaterTracker';
 import { DraggableDashboardItem } from '../components/DraggableDashboardItem';
 import { WorkoutLog } from '../context/AppContext';
-import { ChevronLeft, ChevronRight, Plus, Heart, TrendingUp, Scale, RotateCcw } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Heart, TrendingUp, Scale, RotateCcw, ImagePlus, Trash2 } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, parseISO, isFuture, isToday } from 'date-fns';
+import { toast } from 'sonner';
+import React from 'react';
 const HEADER_IMAGE_URL =
   'https://placehold.co/1200x192/e8dfca/2a2334?text=Normalizacija+Desktop';
+const DASHBOARD_BANNER_STORAGE_KEY = 'dashboardBannerImageV1';
 
 const DEFAULT_SECTION_ORDER = [
+  'priority-task',
   'upcoming-workout',
   'stats',
   'water-tracker',
@@ -39,7 +43,8 @@ function loadSectionOrder(): string[] {
 }
 
 export function Dashboard() {
-  const { workouts } = useApp();
+  const { workouts, getPriorityTaskForDate } = useApp();
+  const bannerInputRef = useRef<HTMLInputElement | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -47,6 +52,10 @@ export function Dashboard() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [editWorkout, setEditWorkout] = useState<WorkoutLog | null>(null);
   const [sectionOrder, setSectionOrder] = useState<string[]>(loadSectionOrder);
+  const [bannerImageUrl, setBannerImageUrl] = useState(() => {
+    const stored = localStorage.getItem(DASHBOARD_BANNER_STORAGE_KEY);
+    return stored || HEADER_IMAGE_URL;
+  });
 
   const moveSection = useCallback((dragIndex: number, hoverIndex: number) => {
     setSectionOrder(prev => {
@@ -86,6 +95,9 @@ export function Dashboard() {
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())[0];
   }, [workouts]);
 
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const priorityTask = getPriorityTaskForDate(today);
+
   const latestWeight = useMemo(() => {
     const withWeight = workouts.filter(w => w.bodyWeight);
     if (withWeight.length === 0) return null;
@@ -93,6 +105,12 @@ export function Dashboard() {
   }, [workouts]);
 
   const totalWorkouts = workouts.length;
+  const totalMovements = workouts.reduce((count, workout) => {
+    if (workout.workoutType === 'yoga') {
+      return count + (workout.yogaPoses?.length ?? 0);
+    }
+    return count + workout.exercises.length;
+  }, 0);
 
   const handleDayClick = (date: Date) => {
     const dateString = format(date, 'yyyy-MM-dd');
@@ -145,8 +163,56 @@ export function Dashboard() {
     localStorage.setItem('dashboardSectionOrder', JSON.stringify(DEFAULT_SECTION_ORDER));
   };
 
+  const handleBannerFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please choose an image file');
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Banner image must be 2MB or smaller');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const nextUrl = String(reader.result || '');
+      if (!nextUrl) return;
+      setBannerImageUrl(nextUrl);
+      localStorage.setItem(DASHBOARD_BANNER_STORAGE_KEY, nextUrl);
+      toast.success('Dashboard banner updated');
+    };
+    reader.readAsDataURL(file);
+    event.target.value = '';
+  };
+
+  const resetBannerImage = () => {
+    setBannerImageUrl(HEADER_IMAGE_URL);
+    localStorage.removeItem(DASHBOARD_BANNER_STORAGE_KEY);
+    toast.success('Banner reset to default');
+  };
+
   const renderSection = (sectionId: string) => {
     switch (sectionId) {
+      case 'priority-task':
+        if (!priorityTask) return null;
+        return (
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3 mb-2">
+                <span className="px-2 py-1 text-xs bg-[#f3a3cd] rounded border border-[#2a2334] text-[#2a2334]">
+                  Priority
+                </span>
+                <h2 className="text-xl font-semibold text-[#2a2334]">Today&apos;s Priority Task</h2>
+              </div>
+              <p className="text-lg text-[#2a2334]">{priorityTask.text}</p>
+              <p className="text-sm text-[#5a4b62] mt-1">Due: {format(parseISO(today), 'MMMM d, yyyy')}</p>
+            </CardContent>
+          </Card>
+        );
       case 'upcoming-workout':
         if (!upcomingWorkout) return null;
         return (
@@ -162,7 +228,19 @@ export function Dashboard() {
                 <p className="text-[#5a4b62] font-medium">
                   {format(parseISO(upcomingWorkout.date), 'EEEE, MMMM d, yyyy')}
                 </p>
-                {upcomingWorkout.exercises.length > 0 && (
+                {upcomingWorkout.workoutType === 'yoga' ? (
+                  <div className="space-y-1">
+                    <div className="text-sm text-[#2a2334]">
+                      Yoga flow: {upcomingWorkout.yogaFlowName || 'Custom flow'}
+                    </div>
+                    {(upcomingWorkout.yogaPoses ?? []).slice(0, 3).map((pose, idx) => (
+                      <div key={idx} className="text-sm text-[#2a2334]">
+                        {idx + 1}. {pose.name}
+                        {pose.durationMinutes ? ` (${pose.durationMinutes} min)` : ''}
+                      </div>
+                    ))}
+                  </div>
+                ) : upcomingWorkout.exercises.length > 0 ? (
                   <div className="space-y-1">
                     {upcomingWorkout.exercises.slice(0, 3).map((ex, idx) => (
                       <div key={idx} className="text-sm text-[#2a2334]">
@@ -170,7 +248,7 @@ export function Dashboard() {
                       </div>
                     ))}
                   </div>
-                )}
+                ) : null}
                 {upcomingWorkout.notes && (
                   <p className="text-sm text-[#5a4b62] border-l-4 border-[#b9a7de] pl-3 mt-2">
                     {upcomingWorkout.notes}
@@ -204,9 +282,9 @@ export function Dashboard() {
               <CardContent className="p-4 text-center">
                 <Heart className="w-8 h-8 text-[#2a2334] fill-[#f3a3cd] mx-auto mb-2" />
                 <div className="text-3xl font-bold text-[#2a2334]">
-                  {workouts.reduce((acc, w) => acc + w.exercises.length, 0)}
+                  {totalMovements}
                 </div>
-                <p className="text-sm text-[#5a4b62]">Total Exercises</p>
+                <p className="text-sm text-[#5a4b62]">Total Movements</p>
               </CardContent>
             </Card>
           </div>
@@ -301,20 +379,43 @@ export function Dashboard() {
                       </div>
                       {hasWorkout && (
                         <div className="space-y-1">
-                          {dayWorkouts[0].exercises.slice(0, 2).map((ex, idx) => (
-                            <div
-                              key={idx}
-                              className="text-xs p-1 bg-[#b8df69] text-[#2a2334] rounded truncate"
-                              title={ex.name}
-                            >
-                              {ex.name}
-                            </div>
-                          ))}
-                          {dayWorkouts[0].exercises.length > 2 && (
-                            <div className="text-xs text-[#5a4b62] text-center">
-                              +{dayWorkouts[0].exercises.length - 2} more
-                            </div>
-                          )}
+                          {dayWorkouts[0].workoutType === 'yoga'
+                            ? (
+                              <>
+                                {(dayWorkouts[0].yogaPoses ?? []).slice(0, 2).map((pose, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="text-xs p-1 bg-[#b8df69] text-[#2a2334] rounded truncate"
+                                    title={pose.name}
+                                  >
+                                    {pose.name}
+                                  </div>
+                                ))}
+                                {(dayWorkouts[0].yogaPoses?.length ?? 0) > 2 && (
+                                  <div className="text-xs text-[#5a4b62] text-center">
+                                    +{(dayWorkouts[0].yogaPoses?.length ?? 0) - 2} more
+                                  </div>
+                                )}
+                              </>
+                            )
+                            : (
+                              <>
+                                {dayWorkouts[0].exercises.slice(0, 2).map((ex, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="text-xs p-1 bg-[#b8df69] text-[#2a2334] rounded truncate"
+                                    title={ex.name}
+                                  >
+                                    {ex.name}
+                                  </div>
+                                ))}
+                                {dayWorkouts[0].exercises.length > 2 && (
+                                  <div className="text-xs text-[#5a4b62] text-center">
+                                    +{dayWorkouts[0].exercises.length - 2} more
+                                  </div>
+                                )}
+                              </>
+                            )}
                         </div>
                       )}
                     </div>
@@ -337,11 +438,40 @@ export function Dashboard() {
           {/* Header with cute image - always on top, not draggable */}
           <div className="relative">
             <img 
-              src={HEADER_IMAGE_URL} 
+              src={bannerImageUrl} 
               alt="Cute Header" 
               className="w-full h-48 object-cover rounded-[14px] border-[3px] border-[#2a2334] shadow-[0_5px_0_#2a2334]"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#f3a3cd]/35 to-transparent rounded-[14px]" />
+            <div className="absolute top-4 right-4 flex items-center gap-2">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="bg-white/80 backdrop-blur-sm"
+                onClick={() => bannerInputRef.current?.click()}
+              >
+                <ImagePlus className="w-4 h-4 mr-1" />
+                Change Banner
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="bg-white/80 backdrop-blur-sm"
+                onClick={resetBannerImage}
+              >
+                <Trash2 className="w-4 h-4 mr-1" />
+                Reset
+              </Button>
+              <input
+                ref={bannerInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleBannerFileChange}
+              />
+            </div>
             <div className="absolute bottom-4 left-6">
               <h1 className="text-4xl font-bold text-[#2a2334] drop-shadow-lg">Workout Tracker</h1>
             </div>
@@ -368,6 +498,7 @@ export function Dashboard() {
             .filter(sectionId => {
               // Filter out sections that render nothing
               if (sectionId === 'upcoming-workout' && !upcomingWorkout) return false;
+              if (sectionId === 'priority-task' && !priorityTask) return false;
               return true;
             })
             .map((sectionId, index) => (

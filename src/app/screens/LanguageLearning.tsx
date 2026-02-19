@@ -109,6 +109,20 @@ interface QuizSession {
 }
 
 const STORAGE_KEY = 'languageLearningDataV1';
+export const LANGUAGE_LEARNING_STORAGE_KEY = STORAGE_KEY;
+export const LANGUAGE_QUIZ_LAUNCH_KEY = 'languageLearningQuizLaunchV1';
+
+export interface QuizLaunchPayload {
+  languageId: string;
+  settings: {
+    mode: QuizMode;
+    direction: QuizDirection;
+    difficulty: QuizDifficulty;
+    count: number;
+    notMasteredOnly: boolean;
+  };
+  launchedAt: number;
+}
 
 const DEFAULT_LANGUAGES: Language[] = [
   { id: 'spanish', name: 'Spanish' },
@@ -214,7 +228,8 @@ export function LanguageLearning() {
   const [sortBy, setSortBy] = useState('newest');
 
   const [manualMinutes, setManualMinutes] = useState('');
-  const [todayNotes, setTodayNotes] = useState('');
+  const [notesDate, setNotesDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+  const [dailyNote, setDailyNote] = useState('');
 
   const [quizSettings, setQuizSettings] = useState({
     mode: 'flashcards' as QuizMode,
@@ -258,6 +273,30 @@ export function LanguageLearning() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   }, [data]);
 
+  useEffect(() => {
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== STORAGE_KEY || !event.newValue) return;
+      try {
+        const parsed = JSON.parse(event.newValue) as LearningData;
+        if (!Array.isArray(parsed.languages) || !Array.isArray(parsed.words) || !Array.isArray(parsed.studyLogs) || !Array.isArray(parsed.quizResults)) {
+          return;
+        }
+        setData({
+          languages: parsed.languages.length > 0 ? parsed.languages : DEFAULT_LANGUAGES,
+          selectedLanguageId: parsed.selectedLanguageId || parsed.languages?.[0]?.id || 'spanish',
+          words: parsed.words,
+          studyLogs: parsed.studyLogs,
+          quizResults: parsed.quizResults,
+        });
+      } catch {
+        // Ignore malformed cross-window updates.
+      }
+    };
+
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
+
   const selectedLanguage = useMemo(
     () => data.languages.find((lang) => lang.id === data.selectedLanguageId),
     [data.languages, data.selectedLanguageId],
@@ -277,9 +316,11 @@ export function LanguageLearning() {
   const today = format(new Date(), 'yyyy-MM-dd');
 
   useEffect(() => {
-    const log = data.studyLogs.find((item) => item.languageId === data.selectedLanguageId && item.date === today);
-    setTodayNotes(log?.notes || '');
-  }, [data.selectedLanguageId, data.studyLogs, today]);
+    const log = data.studyLogs.find(
+      (item) => item.languageId === data.selectedLanguageId && item.date === notesDate,
+    );
+    setDailyNote(log?.notes || '');
+  }, [data.selectedLanguageId, data.studyLogs, notesDate]);
 
   const filteredWords = useMemo(() => {
     const searched = wordsForLanguage.filter((word) => {
@@ -494,17 +535,17 @@ export function LanguageLearning() {
     }));
   };
 
-  const saveTodayNotes = () => {
+  const saveDailyNote = () => {
     setData((prev) => {
       const existing = prev.studyLogs.find(
-        (log) => log.languageId === prev.selectedLanguageId && log.date === today,
+        (log) => log.languageId === prev.selectedLanguageId && log.date === notesDate,
       );
 
       if (existing) {
         return {
           ...prev,
           studyLogs: prev.studyLogs.map((log) =>
-            log.id === existing.id ? { ...log, notes: todayNotes } : log,
+            log.id === existing.id ? { ...log, notes: dailyNote } : log,
           ),
         };
       }
@@ -515,15 +556,15 @@ export function LanguageLearning() {
           {
             id: Date.now().toString(),
             languageId: prev.selectedLanguageId,
-            date: today,
+            date: notesDate,
             minutes: 0,
-            notes: todayNotes,
+            notes: dailyNote,
           },
           ...prev.studyLogs,
         ],
       };
     });
-    toast.success('Daily note saved');
+    toast.success(`Note saved for ${notesDate}`);
   };
 
   const addStudyMinutes = (minutes: number) => {
@@ -679,6 +720,25 @@ export function LanguageLearning() {
       return;
     }
 
+    const launchPayload: QuizLaunchPayload = {
+      languageId: data.selectedLanguageId,
+      settings: { ...quizSettings },
+      launchedAt: Date.now(),
+    };
+    localStorage.setItem(LANGUAGE_QUIZ_LAUNCH_KEY, JSON.stringify(launchPayload));
+
+    const popup = window.open(
+      '/language-learning/quiz',
+      'language-quiz',
+      'popup=yes,width=1440,height=900,left=120,top=40,resizable=yes,scrollbars=yes',
+    );
+
+    if (popup) {
+      popup.focus();
+      return;
+    }
+
+    toast.error('Popup was blocked. Allow popups and try again.');
     setLastQuizSummary(null);
     setTypingAnswer('');
     setQuizSession({
@@ -856,6 +916,7 @@ export function LanguageLearning() {
   };
 
   const currentQuestion = quizSession?.questions[quizSession.index];
+  const notesForSelectedDate = languageStudyLogs.find((log) => log.date === notesDate);
 
   return (
     <div className="min-h-screen retro-desktop p-4 md:p-8">
@@ -1220,16 +1281,30 @@ export function LanguageLearning() {
                   </Button>
                 </div>
                 <div>
-                  <Label htmlFor="daily-note">What I learned today</Label>
+                  <Label htmlFor="daily-note-date">Notes date</Label>
+                  <Input
+                    id="daily-note-date"
+                    type="date"
+                    value={notesDate}
+                    onChange={(e) => setNotesDate(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="daily-note">What I learned on {notesDate}</Label>
                   <Textarea
                     id="daily-note"
-                    value={todayNotes}
-                    onChange={(e) => setTodayNotes(e.target.value)}
-                    placeholder="Quick study note"
+                    value={dailyNote}
+                    onChange={(e) => setDailyNote(e.target.value)}
+                    placeholder="Write your learning notes for this day"
                   />
-                  <Button className="mt-2" variant="outline" onClick={saveTodayNotes}>
+                  <Button className="mt-2" variant="outline" onClick={saveDailyNote}>
                     Save Note
                   </Button>
+                  {notesForSelectedDate?.minutes ? (
+                    <p className="text-xs text-slate-600 mt-2">
+                      Logged study time for this day: {notesForSelectedDate.minutes} minute(s)
+                    </p>
+                  ) : null}
                 </div>
               </CardContent>
             </Card>

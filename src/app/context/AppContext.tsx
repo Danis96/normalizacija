@@ -32,10 +32,21 @@ export interface Exercise {
   weight?: number;
 }
 
+export interface YogaPose {
+  name: string;
+  durationMinutes?: number;
+  notes?: string;
+}
+
+export type WorkoutType = 'strength' | 'yoga';
+
 export interface WorkoutLog {
   id: string;
   date: string;
+  workoutType?: WorkoutType;
   exercises: Exercise[];
+  yogaFlowName?: string | null;
+  yogaPoses?: YogaPose[] | null;
   bodyWeight?: number;
   notes: string;
   imageUrl?: string;
@@ -52,6 +63,7 @@ export interface TodoItem {
   text: string;
   completed: boolean;
   date?: string;
+  priority?: boolean;
 }
 
 export interface SpendingEntry {
@@ -83,7 +95,10 @@ export interface CinemaItem {
 
 export interface WorkoutInput {
   date: string;
+  workoutType?: WorkoutType;
   exercises: Exercise[];
+  yogaFlowName?: string | null;
+  yogaPoses?: YogaPose[] | null;
   bodyWeight?: number;
   notes: string;
   imageUrl?: string;
@@ -130,11 +145,12 @@ interface AppContextType {
   removeWaterBottle: (date: string) => Promise<void>;
   getWaterForDate: (date: string) => number;
   todos: TodoItem[];
-  addTodo: (text: string, date?: string) => Promise<void>;
+  addTodo: (text: string, date?: string, priority?: boolean) => Promise<void>;
   toggleTodo: (id: string) => Promise<void>;
   deleteTodo: (id: string) => Promise<void>;
   getTodosForDate: (date: string) => TodoItem[];
   getWheneverTodos: () => TodoItem[];
+  getPriorityTaskForDate: (date: string) => TodoItem | undefined;
   spending: SpendingEntry[];
   addSpending: (entry: SpendingInput) => Promise<void>;
   deleteSpending: (id: string) => Promise<void>;
@@ -272,9 +288,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
           query(collection(db, 'users', user.uid, 'todos'), orderBy('date', 'desc')),
           (snapshot) => {
             setTodos(
-              snapshot.docs.map((docSnap) =>
-                mapDoc(docSnap.id, docSnap.data() as Omit<TodoItem, 'id'>),
-              ),
+              snapshot.docs.map((docSnap) => {
+                const raw = docSnap.data() as {
+                  text: string;
+                  completed: boolean;
+                  date?: string | null;
+                  priority?: boolean;
+                };
+                return {
+                  id: docSnap.id,
+                  text: raw.text,
+                  completed: raw.completed,
+                  date: raw.date ?? undefined,
+                  priority: Boolean(raw.priority),
+                };
+              }),
             );
           },
         ),
@@ -405,7 +433,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     await addDoc(collection(db, 'users', uid, 'workouts'), {
       date: workout.date,
+      workoutType: workout.workoutType ?? 'strength',
       exercises: workout.exercises,
+      yogaFlowName: workout.yogaFlowName ?? null,
+      yogaPoses: workout.yogaPoses ?? null,
       bodyWeight: workout.bodyWeight ?? null,
       notes: workout.notes,
       imageUrl: imageUrl ?? null,
@@ -425,8 +456,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     await updateDoc(workoutRef, {
       ...(updatedWorkout.date !== undefined ? { date: updatedWorkout.date } : {}),
+      ...(updatedWorkout.workoutType !== undefined
+        ? { workoutType: updatedWorkout.workoutType }
+        : {}),
       ...(updatedWorkout.exercises !== undefined
         ? { exercises: updatedWorkout.exercises }
+        : {}),
+      ...(updatedWorkout.yogaFlowName !== undefined
+        ? { yogaFlowName: updatedWorkout.yogaFlowName }
+        : {}),
+      ...(updatedWorkout.yogaPoses !== undefined
+        ? { yogaPoses: updatedWorkout.yogaPoses }
         : {}),
       ...(updatedWorkout.bodyWeight !== undefined
         ? { bodyWeight: updatedWorkout.bodyWeight }
@@ -489,12 +529,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return log?.bottles ?? 0;
   };
 
-  const addTodo = async (text: string, date?: string) => {
+  const addTodo = async (text: string, date?: string, priority = false) => {
     const uid = requireUid();
     await addDoc(collection(db, 'users', uid, 'todos'), {
       text,
       completed: false,
       date: date ?? null,
+      priority,
     });
   };
 
@@ -521,6 +562,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const getWheneverTodos = (): TodoItem[] => {
     return todos.filter((todo) => !todo.date);
+  };
+
+  const getPriorityTaskForDate = (date: string): TodoItem | undefined => {
+    return todos.find((todo) => todo.date === date && todo.priority && !todo.completed);
   };
 
   const addSpending = async (entry: SpendingInput) => {
@@ -631,6 +676,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       deleteTodo,
       getTodosForDate,
       getWheneverTodos,
+      getPriorityTaskForDate,
       spending,
       addSpending,
       deleteSpending,
